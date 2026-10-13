@@ -3,7 +3,7 @@
 
     python3 scripts/make-android-icon.py ~/dev/hermes-gadget-sdk-ble
 
-The same art as AppIcon.png (scripts/make-icon.py): the 1-bit idle mascot
+The same art as ios/AppIcon.png (scripts/make-icon.py): the 1-bit idle mascot
 from firmware/core/src/mascot_data.cpp, pixel for pixel at a whole-number
 scale. Writes an adaptive icon's layers into android/app/src/main/res, for
 every density: ic_launcher_foreground.png (the mascot in the gadget's white,

@@ -16,42 +16,39 @@ Taken in the app's demo, so the gadget, networks and server are made up.
   <img src="docs/screenshots/console.png" width="160" alt="Console: quick commands and the gadget> prompt">
 </p>
 
-## Status
+## Repository layout
 
-The SwiftUI interface, iOS 17 or later, with a Core Bluetooth link to the gadget (`BluetoothGadgetLink`) behind the `GadgetLink` protocol. `MockGadgetLink` acts out mock scenarios for trying screens without a gadget.
+| Folder | What's in it |
+|---|---|
+| `ios/` | The iOS app: an xtool Swift package (`Package.swift`, `xtool.yml`), the SwiftUI app in `Sources/`, and its logic in the `GadgetKit` package with its tests |
+| `android/` | The Android app: a Gradle project with the logic in `core` (a Kotlin port of GadgetKit, with its tests) and the Compose app in `app` |
+| `fixtures/` | Reply samples, exactly as the gadget sends them, that both apps' tests read |
+| `scripts/` | Generate the pixel font, mascot frames and icons for both apps from an SDK checkout |
+| `docs/` | Screenshots |
 
-Without a gadget, tap **Try the demo** on the first screen: pretend gadgets to explore every screen, also handy for screenshots. It isn't kept across launches. To switch between real Bluetooth and the other mock scenarios, long-press any screen's title for a second to open the debug menu. The choice is kept across launches; the launch argument `-mockScenario <name>` sets it too.
+Both apps have the same screens, states and copy, styled like the gadget's own display. Without a gadget, tap **Try the demo** on the first screen: pretend gadgets to explore every screen, also handy for screenshots. It isn't kept across launches. To switch between real Bluetooth and the other mock scenarios, long-press any screen's title for a second to open the debug menu; that choice is kept.
 
-The pixel font, the mascot frames and the app icon come from the SDK's firmware. To regenerate them (the icon needs Pillow):
+## iOS
+
+iOS 17 or later. The app is a Swift package built with [xtool](https://github.com/xtool-org/xtool), so it builds on Linux as well as macOS. From `ios/`:
 
 ```bash
-python3 scripts/generate-assets.py ~/path/to/hermes-gadget-sdk
-python3 scripts/make-icon.py ~/path/to/hermes-gadget-sdk
+swift test --package-path GadgetKit   # the app's logic, on Linux or macOS
+xtool dev build                       # builds xtool/HermesCompanion.app
+xtool dev                             # builds, signs and installs on a connected iPhone
 ```
 
-## Building
-
-The app is a Swift package built with [xtool](https://github.com/xtool-org/xtool), so it builds on Linux as well as macOS.
-
-```bash
-xtool dev build       # builds xtool/HermesCompanion.app
-xtool dev             # builds, signs and installs on a connected iPhone
-```
-
-The app's logic is in the `GadgetKit` package, which needs only Foundation: `swift test --package-path GadgetKit` runs its tests on Linux or macOS.
-
-Installing on a phone needs `xtool auth login` with your Apple ID. Without a paid developer account, the app's signature expires after seven days and needs reinstalling.
+Installing on a phone needs `xtool auth login` with your Apple ID. Without a paid developer account, the app's signature expires after seven days and needs reinstalling. The launch argument `-mockScenario <name>` picks a mock scenario.
 
 ## Android
 
-The Android app (in `android/`, for Android 10 or later) has the same screens, states and copy as the iOS app, styled the same way, with a Jetpack Compose interface and a Bluetooth LE link built on Android's `BluetoothGatt`.
+Android 10 or later, with a Jetpack Compose interface and a Bluetooth LE link built on Android's `BluetoothGatt`.
 
-**Status:** it builds, its logic has tests, and every screen works against the mock gadget, but **its Bluetooth link hasn't been tried on a phone yet**. The app's logic is a Kotlin port of GadgetKit (`android/core`), tested on the JVM against the same reply samples as the Swift tests (`fixtures/`), and so is the radio-free half of the link: its operation queue, pairing and failure mapping. Scanning, pairing and talking to a real gadget still need checking on a device.
+**Status:** it builds, its logic has tests, and every screen works against the mock gadget, but **its Bluetooth link hasn't been tried on a phone yet**. The radio-free half of the link (its operation queue, pairing and failure mapping) is tested on the JVM; scanning, pairing and talking to a real gadget still need checking on a device.
 
-Build it with JDK 21 and the Android SDK (platform 37.2), then install the debug APK on a phone with USB debugging on:
+Build it with JDK 21 and the Android SDK (platform 37.2), then install the debug APK on a phone with USB debugging on. From `android/`:
 
 ```bash
-cd android
 ./gradlew :core:test :app:assembleDebug     # tests, then app/build/outputs/apk/debug/app-debug.apk
 adb install app/build/outputs/apk/debug/app-debug.apk
 ```
@@ -65,13 +62,16 @@ What a phone and a gadget still have to show:
 - replies longer than one notification, and the link dropping out of range;
 - `phone forget`, and pairing again afterwards.
 
-**Try the demo**, the debug menu (hold a screen's title for a second) and the mock scenarios work as on iOS. A scenario can also be set for one launch: `adb shell am start -n com.tozes.hermescompanion/.MainActivity -e mockScenario online`.
+A mock scenario can be set for one launch: `adb shell am start -n com.tozes.hermescompanion/.MainActivity -e mockScenario online`.
 
-The Android pixel font, mascot frames and launcher icon are generated from the SDK too:
+## Generated assets
+
+The pixel font, the mascot frames and the icons come from the SDK's firmware, for both apps. To regenerate them from the repository root (the icons need Pillow):
 
 ```bash
-python3 scripts/generate-assets.py ~/path/to/hermes-gadget-sdk     # also writes the Kotlin tables
-python3 scripts/make-android-icon.py ~/path/to/hermes-gadget-sdk   # the adaptive launcher icon
+python3 scripts/generate-assets.py ~/path/to/hermes-gadget-sdk     # font and mascot, Swift and Kotlin
+python3 scripts/make-icon.py ~/path/to/hermes-gadget-sdk           # ios/AppIcon.png
+python3 scripts/make-android-icon.py ~/path/to/hermes-gadget-sdk   # the Android adaptive launcher icon
 ```
 
 ## License

@@ -3,7 +3,7 @@
 
     python3 scripts/make-icon.py ~/dev/hermes-gadget-sdk-ble
 
-Writes AppIcon.png (1024x1024, opaque): the 1-bit idle mascot from
+Writes ios/AppIcon.png (1024x1024, opaque): the 1-bit idle mascot from
 firmware/core/src/mascot_data.cpp in white, pixel for pixel at a whole-number
 scale, centred on black. Needs Pillow.
 """
@@ -50,7 +50,7 @@ def main() -> None:
                 px, py = x0 + x * scale, y0 + y * scale
                 draw.rectangle((px, py, px + scale - 1, py + scale - 1), fill=INK)
 
-    out = ROOT / "AppIcon.png"
+    out = ROOT / "ios" / "AppIcon.png"
     icon.save(out)
     print(f"wrote {out}")
 

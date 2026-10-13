@@ -3,9 +3,9 @@
 
     python3 scripts/generate-assets.py ~/dev/hermes-gadget-sdk-ble
 
-Writes, for the iOS app, Sources/HermesCompanion/Pixel/PixelFontGlyphs.swift
+Writes, for the iOS app, ios/Sources/HermesCompanion/Pixel/PixelFontGlyphs.swift
 (from firmware/core/src/font5x7.cpp) and
-GadgetKit/Sources/GadgetKit/Pixel/MascotFrames.swift (from
+ios/GadgetKit/Sources/GadgetKit/Pixel/MascotFrames.swift (from
 firmware/core/src/mascot_data.cpp), and the same two tables for the Android
 app in android/core (PixelFontGlyphs.kt and MascotFrames.kt). The glyphs stay
 ASCII art so they are reviewable in a diff; the mascot bitmaps become base64
@@ -18,8 +18,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-FONT_OUT = ROOT / "Sources" / "HermesCompanion" / "Pixel" / "PixelFontGlyphs.swift"
-MASCOT_OUT = ROOT / "GadgetKit" / "Sources" / "GadgetKit" / "Pixel" / "MascotFrames.swift"
+FONT_OUT = ROOT / "ios" / "Sources" / "HermesCompanion" / "Pixel" / "PixelFontGlyphs.swift"
+MASCOT_OUT = ROOT / "ios" / "GadgetKit" / "Sources" / "GadgetKit" / "Pixel" / "MascotFrames.swift"
 KOTLIN_DIR = ROOT / "android" / "core" / "src" / "main" / "kotlin" / "com" / "tozes" / "hermescompanion" / "core"
 KOTLIN_FONT_OUT = KOTLIN_DIR / "PixelFontGlyphs.kt"
 KOTLIN_MASCOT_OUT = KOTLIN_DIR / "MascotFrames.kt"

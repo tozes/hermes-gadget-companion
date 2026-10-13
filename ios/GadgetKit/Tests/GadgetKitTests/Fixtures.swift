@@ -9,6 +9,7 @@ enum Fixture {
         .deletingLastPathComponent()  // GadgetKitTests
         .deletingLastPathComponent()  // Tests
         .deletingLastPathComponent()  // GadgetKit
+        .deletingLastPathComponent()  // ios
         .deletingLastPathComponent()  // the repository
         .appendingPathComponent("fixtures/replies")
 

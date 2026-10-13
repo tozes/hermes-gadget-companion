@@ -1,13 +1,14 @@
 .DS_Store
 .build/
-/Packages
+Packages/
 xcuserdata/
 DerivedData/
 .swiftpm/configuration/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
 
-/xtool
+# iOS (ios/): what `xtool dev` writes
+/ios/xtool
 
 # Android (android/): Gradle and build outputs, and the local SDK path
 .gradle/
