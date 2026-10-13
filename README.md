@@ -4,6 +4,18 @@ An iOS app for [Hermes Gadget](https://github.com/Adolanium/hermes-gadget-sdk) d
 
 The gadget's side of the link is described in the SDK's [protocol guide](https://github.com/Adolanium/hermes-gadget-sdk/blob/main/docs/protocol.md#phone-app-over-bluetooth). The app sends the same console commands as the gadget's USB console. Bluetooth is experimental in the firmware and off on every board until it passes the SDK's [Bluetooth checks](https://github.com/Adolanium/hermes-gadget-sdk/blob/main/docs/hardware-validation.md#bluetooth).
 
+## Screenshots
+
+Taken in the app's demo, so the gadget, networks and server are made up.
+
+<p>
+  <img src="docs/screenshots/home.png" width="160" alt="Home: the mascot, Online, and rows for Wi-Fi, Settings and Advanced">
+  <img src="docs/screenshots/wifi.png" width="160" alt="Wi-Fi: on Lisbon Loft, two saved networks, Add a network">
+  <img src="docs/screenshots/settings.png" width="160" alt="Settings: name, volume, talk mode, brightness, screen timeout">
+  <img src="docs/screenshots/advanced.png" width="160" alt="Advanced: battery, Wi-Fi, Hermes, server, firmware, board, device ID, console and Forget">
+  <img src="docs/screenshots/console.png" width="160" alt="Console: quick commands and the gadget> prompt">
+</p>
+
 ## Status
 
 The SwiftUI interface, iOS 17 or later, with a Core Bluetooth link to the gadget (`BluetoothGadgetLink`) behind the `GadgetLink` protocol. `MockGadgetLink` acts out mock scenarios for trying screens without a gadget.
