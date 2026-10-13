@@ -66,6 +66,11 @@ public final class GadgetStore {
     }
 
     /// Swaps in another link (the debug menu's mock scenarios) and starts over.
+    /// The app is showing the demo: a mock gadget, not real Bluetooth.
+    public var isDemo: Bool {
+        (link as? MockGadgetLink)?.scenario == .demo
+    }
+
     public func replaceLink(_ newLink: any GadgetLink) {
         link.onEvent = nil
         link.stopScan()
@@ -129,7 +134,10 @@ public final class GadgetStore {
 
     // MARK: Connecting
 
+    /// Connects from the gadget list. Each new connection starts with an empty
+    /// console; reconnecting after a drop keeps it.
     public func connect(to target: DiscoveredGadget) {
+        if stage == .finding { console = [] }
         stopScan()
         forgottenName = nil
         resetConnection()

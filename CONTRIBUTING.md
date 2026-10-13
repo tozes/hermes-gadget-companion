@@ -38,7 +38,7 @@ Without a paid Apple developer account, a signed build expires after seven days 
 | The `HermesCompanion` app (`Sources/HermesCompanion`) | The SwiftUI screens and styles, and `BluetoothGadgetLink` (Core Bluetooth) | iOS |
 | `GadgetKitTests` (`GadgetKit/Tests/GadgetKitTests`) | Swift Testing tests for GadgetKit | Linux, macOS |
 
-GadgetKit is a separate local package so its tests build without SwiftUI or Core Bluetooth; the app depends on it by path. Screens only talk to `GadgetStore`, and the store only talks to a `GadgetLink`. Put logic in GadgetKit where it can be tested, and keep views thin. `MockGadgetLink` acts out the scenarios in the debug menu (hold any screen's title for a second), so most UI work doesn't need a gadget.
+GadgetKit is a separate local package so its tests build without SwiftUI or Core Bluetooth; the app depends on it by path. Screens only talk to `GadgetStore`, and the store only talks to a `GadgetLink`. Put logic in GadgetKit where it can be tested, and keep views thin. `MockGadgetLink` acts out the demo (**Try the demo** on the first screen) and the scenarios in the debug menu (hold any screen's title for a second), so most UI work doesn't need a gadget. Take screenshots in the demo: its data is made up, so nothing real leaks.
 
 ## Working with the gadget
 

@@ -1,16 +1,6 @@
 import GadgetKit
 import SwiftUI
 
-extension HermesLink {
-    var color: Color {
-        switch self {
-        case .noNetwork: Palette.red
-        case .network, .connecting: Palette.yellow
-        case .online: Palette.green
-        }
-    }
-}
-
 /// What the device home says about a status: the hero's headline, detail and indicator.
 struct StatusSummary {
     enum NextStep {
@@ -49,6 +39,11 @@ struct StatusSummary {
         case .other(let raw):
             self.init(.dot(Palette.dim), raw, Palette.text, "\(name) reports phase \"\(raw)\".")
         }
+    }
+
+    /// The Bluetooth link dropped: the last status is stale, so it isn't shown.
+    static func connectionLost(name: String) -> StatusSummary {
+        StatusSummary(.alert, "Not connected", Palette.red, "Reconnect to see how \(name) is doing.")
     }
 
     private init(

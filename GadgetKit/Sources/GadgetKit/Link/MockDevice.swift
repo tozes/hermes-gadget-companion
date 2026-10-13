@@ -53,6 +53,13 @@ struct MockDevice {
             board: "esp32s3-touch-amoled-1.75c"
         )
         switch scenario {
+        case .demo:
+            device.goOnline(approved: true)
+            device.batteryMv = 3962
+            device.batteryPercent = 76
+            device.charging = false
+            device.externalPower = false
+            device.networks.append(SavedNetwork(ssid: "Pocket Hotspot", password: "hotspot-pass", tested: true))
         case .online:
             device.goOnline(approved: true)
             device.networks.append(SavedNetwork(ssid: "Pocket Hotspot", password: "hotspot-pass", tested: false))
