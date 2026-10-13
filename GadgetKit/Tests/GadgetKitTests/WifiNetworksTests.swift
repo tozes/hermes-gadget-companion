@@ -37,6 +37,29 @@ struct WifiNetworksTests {
         #expect(list.networks.isEmpty)
     }
 
+    @Test func missingFieldsGetDefaults() {
+        guard case .wifi(let list) = Reply.parse(#"@wifi {"networks":[{"ssid":"A"}]}"#) else {
+            Issue.record("not a wifi list")
+            return
+        }
+        #expect(list.networks == [WifiNetworkList.Network(ssid: "A", tested: false, open: false)])
+        #expect(list.max == 5)
+        #expect(list.current == nil)
+        guard case .wifi(let empty) = Reply.parse("@wifi {}") else {
+            Issue.record("an empty object is not a wifi list")
+            return
+        }
+        #expect(empty.networks.isEmpty)
+    }
+
+    @Test func aNetworkWithoutANameIsNotAList() {
+        guard case .other(let tag, _) = Reply.parse(#"@wifi {"networks":[{"tested":true}],"max":5}"#) else {
+            Issue.record("decoded a network with no name")
+            return
+        }
+        #expect(tag == "wifi")
+    }
+
     /// The same cases as the firmware's `console args` test.
     @Test func argumentsSplitLikeTheGadget() {
         #expect(ConsoleArgument.split("add  Home   secret") == ["add", "Home", "secret"])

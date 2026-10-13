@@ -18,6 +18,17 @@ public struct WifiNetworkList: Decodable, Equatable, Sendable {
             self.tested = tested
             self.open = open
         }
+
+        private enum CodingKeys: String, CodingKey { case ssid, tested, open }
+
+        // Only the name is required, like GadgetStatus: other firmware may
+        // leave a field out, and that shouldn't hide the whole list.
+        public init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            ssid = try c.decode(String.self, forKey: .ssid)
+            tested = try c.decodeIfPresent(Bool.self, forKey: .tested) ?? false
+            open = try c.decodeIfPresent(Bool.self, forKey: .open) ?? false
+        }
     }
 
     public let networks: [Network]
@@ -30,6 +41,18 @@ public struct WifiNetworkList: Decodable, Equatable, Sendable {
         self.networks = networks
         self.max = max
         self.current = current
+    }
+
+    /// The firmware keeps five (`WifiNetworks::kMax` in the SDK).
+    static let defaultMax = 5
+
+    private enum CodingKeys: String, CodingKey { case networks, max, current }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        networks = try c.decodeIfPresent([Network].self, forKey: .networks) ?? []
+        max = try c.decodeIfPresent(Int.self, forKey: .max) ?? Self.defaultMax
+        current = try c.decodeIfPresent(String.self, forKey: .current)
     }
 
     public var isFull: Bool { networks.count >= max }
