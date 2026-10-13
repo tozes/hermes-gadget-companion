@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- The console no longer shows secrets the app or you send: Wi-Fi passwords and the Hermes access token appear as `<hidden>` (the gadget still gets them).
 - An Android app (Android 10 or later) with the same screens, demo and debug menu as the iOS app, its logic ported to Kotlin and tested against the same reply samples; it builds and passes its tests, but its Bluetooth link hasn't been tried on a phone yet.
 
 - A demo for trying the app without a gadget: **Try the demo** on the first screen opens pretend gadgets to pair with and explore, also good for screenshots. **Leave the demo** on the first screen or under **Advanced** goes back to Bluetooth, and the app always starts on Bluetooth.

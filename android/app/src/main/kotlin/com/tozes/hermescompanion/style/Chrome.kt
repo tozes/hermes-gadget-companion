@@ -60,8 +60,11 @@ fun Modifier.debugMenuTrigger(open: (() -> Unit)?): Modifier {
         .pointerInput(open) {
             awaitEachGesture {
                 awaitFirstDown(requireUnconsumed = false)
-                val released = withTimeoutOrNull(1000) { waitForUpOrCancellation() }
-                if (released == null) open()
+                // Null only when the second runs out: a lifted or cancelled
+                // touch finishes the block (waitForUpOrCancellation returns
+                // null on cancel, so its result can't be the test).
+                val ended = withTimeoutOrNull(1000) { waitForUpOrCancellation(); true }
+                if (ended == null) open()
             }
         }
         .semantics { customActions = listOf(CustomAccessibilityAction("Debug menu") { open(); true }) }

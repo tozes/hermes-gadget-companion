@@ -303,6 +303,25 @@ struct GadgetStoreTests {
         #expect(store.settings[.token] == "")
     }
 
+    /// The gadget gets secrets as typed; the console only ever shows them hidden.
+    @Test func secretsStayOutOfTheConsole() async {
+        let store = await connectedNox()
+        _ = await store.save(.wifiPassword, "correct horse")
+        _ = await store.save(.token, "tok-123")
+        _ = await store.send(#"wifi add "Lisbon Loft" "hotspot pass""#, typed: true)
+        #expect(link.sent.suffix(3) == ["set wifi_pass correct horse", "set token tok-123", #"wifi add "Lisbon Loft" "hotspot pass""#])
+        let commands = store.console.filter { $0.kind == .command }.map(\.text)
+        #expect(commands.suffix(3) == ["set wifi_pass <hidden>", "set token <hidden>", #"wifi add "Lisbon Loft" <hidden>"#])
+        #expect(!store.console.contains { $0.text.contains("correct horse") || $0.text.contains("tok-123") || $0.text.contains("hotspot pass") })
+    }
+
+    @Test func ordinaryLinesAreLoggedAsTyped() {
+        #expect(ConsoleArgument.redacted("set volume 40") == "set volume 40")
+        #expect(ConsoleArgument.redacted("set token") == "set token")
+        #expect(ConsoleArgument.redacted("wifi add Open") == "wifi add Open")
+        #expect(ConsoleArgument.redacted("get wifi_pass") == "get wifi_pass")
+    }
+
     @Test func renamingUpdatesTheStatusAndGadget() async {
         let store = await connectedNox()
         #expect(await store.save(.name, " Desk ") == nil)

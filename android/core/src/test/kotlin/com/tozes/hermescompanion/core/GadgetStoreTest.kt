@@ -348,6 +348,33 @@ class GadgetStoreTest {
         assertEquals("", store.s.settings[SettingKey.TOKEN])
     }
 
+    /** The gadget gets secrets as typed; the console only ever shows them hidden. */
+    @Test
+    fun secretsStayOutOfTheConsole() = runTest {
+        val store = connectedNox()
+        store.save(SettingKey.WIFI_PASSWORD, "correct horse")
+        store.save(SettingKey.TOKEN, "tok-123")
+        store.send("wifi add \"Lisbon Loft\" \"hotspot pass\"", typed = true)
+        assertEquals(
+            listOf("set wifi_pass correct horse", "set token tok-123", "wifi add \"Lisbon Loft\" \"hotspot pass\""),
+            link.sent.takeLast(3),
+        )
+        val commands = store.s.console.filter { it.kind == ConsoleEntry.Kind.COMMAND }.map { it.text }
+        assertEquals(
+            listOf("set wifi_pass <hidden>", "set token <hidden>", "wifi add \"Lisbon Loft\" <hidden>"),
+            commands.takeLast(3),
+        )
+        assertTrue(store.s.console.none { "correct horse" in it.text || "tok-123" in it.text || "hotspot pass" in it.text })
+    }
+
+    @Test
+    fun ordinaryLinesAreLoggedAsTyped() {
+        assertEquals("set volume 40", ConsoleArgument.redacted("set volume 40"))
+        assertEquals("set token", ConsoleArgument.redacted("set token"))
+        assertEquals("wifi add Open", ConsoleArgument.redacted("wifi add Open"))
+        assertEquals("get wifi_pass", ConsoleArgument.redacted("get wifi_pass"))
+    }
+
     @Test
     fun renamingUpdatesTheStatusAndGadget() = runTest {
         val store = connectedNox()

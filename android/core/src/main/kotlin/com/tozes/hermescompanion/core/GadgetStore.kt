@@ -264,7 +264,7 @@ class GadgetStore(
     private suspend fun perform(line: String, typed: Boolean): Reply {
         val started = generation
         val clean = line.replace("\n", " ")
-        log(ConsoleEntry.Kind.COMMAND, clean, typed)
+        log(ConsoleEntry.Kind.COMMAND, ConsoleArgument.redacted(clean), typed)
         if (clean.encodeToByteArray().size > MAX_LINE_BYTES) {
             note("Not sent: lines are limited to $MAX_LINE_BYTES bytes", typed)
             return Reply.Error("too long: the gadget takes lines up to $MAX_LINE_BYTES bytes")

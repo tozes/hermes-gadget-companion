@@ -46,6 +46,27 @@ data class WifiNetworkList(
  * quote or space.
  */
 object ConsoleArgument {
+    /** The placeholder for a secret in the console's scrollback. */
+    const val HIDDEN = "<hidden>"
+
+    /**
+     * [line] as the console shows it: the value of `set token` and
+     * `set wifi_pass`, and the password of `wifi add`, replaced with
+     * [HIDDEN]. The gadget still gets the line as written.
+     */
+    fun redacted(line: String): String {
+        val words = split(line)
+        if (words.size < 3) return line
+        if (words[0] == "set") {
+            val key = SettingKey.entries.firstOrNull { it.rawValue == words[1] }
+            if (key != null && key.isSecret) return "set ${key.rawValue} $HIDDEN"
+        }
+        if (words[0] == "wifi" && words[1] == "add" && words.size >= 4) {
+            return "wifi add ${quoted(words[2])} $HIDDEN"
+        }
+        return line
+    }
+
     fun quoted(value: String): String {
         val out = StringBuilder("\"")
         for (character in value) {
