@@ -1,3 +1,4 @@
+import GadgetKit
 import SwiftUI
 
 /// The round gadget at the top of the device home, showing what its own

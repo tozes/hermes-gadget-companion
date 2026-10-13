@@ -1,3 +1,4 @@
+import GadgetKit
 import SwiftUI
 
 /// A gadget found while scanning: its advertised name and signal.

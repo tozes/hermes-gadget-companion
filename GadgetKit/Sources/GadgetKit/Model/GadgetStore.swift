@@ -4,42 +4,48 @@ import Observation
 /// The app's state, observed by every screen. It drives a `GadgetLink`,
 /// sends console lines one at a time, and keeps what the replies say.
 @MainActor @Observable
-final class GadgetStore {
-    enum Stage: Equatable {
+public final class GadgetStore {
+    public enum Stage: Equatable {
         case finding, pairing, connected
     }
 
-    enum PairingProgress: Equatable {
+    public enum PairingProgress: Equatable {
         case connecting
         case awaitingPasskey
         case failed(LinkFailure)
     }
 
-    static let scanDuration: Duration = .seconds(20)
     static let maxLineBytes = 256
     private static let consoleLimit = 500
 
-    private(set) var link: any GadgetLink
-    private(set) var radio: RadioState
-    private(set) var isScanning = false
+    /// How long a scan runs before it stops on its own.
+    let scanDuration: Duration
+    public private(set) var link: any GadgetLink
+    public private(set) var radio: RadioState
+    public private(set) var isScanning = false
     /// A scan ran for `scanDuration` and stopped on its own.
     private(set) var scanEnded = false
-    private(set) var found: [DiscoveredGadget] = []
-    private(set) var stage: Stage = .finding
-    private(set) var pairing: PairingProgress = .connecting
-    private(set) var gadget: DiscoveredGadget?
-    private(set) var status: GadgetStatus?
-    private(set) var statusDate: Date?
-    private(set) var statusError: String?
+    public private(set) var found: [DiscoveredGadget] = []
+    public private(set) var stage: Stage = .finding
+    public private(set) var pairing: PairingProgress = .connecting
+    public private(set) var gadget: DiscoveredGadget?
+    public private(set) var status: GadgetStatus?
+    public private(set) var statusDate: Date?
+    public private(set) var statusError: String?
     private(set) var isRefreshing = false
-    private(set) var isLoadingSettings = false
+    public private(set) var isLoadingSettings = false
     /// The link dropped while connected.
-    private(set) var connectionLost = false
+    public private(set) var connectionLost = false
     /// The last `get` value of each setting; secrets are `<set>` or empty.
-    private(set) var settings: [SettingKey: String] = [:]
-    private(set) var console: [ConsoleEntry] = []
+    public private(set) var settings: [SettingKey: String] = [:]
+    /// The saved Wi-Fi networks from the last `wifi list`.
+    public private(set) var wifiNetworks: WifiNetworkList?
+    /// The firmware has no `wifi` command: it keeps one network, set with
+    /// `set wifi_ssid` and `set wifi_pass`.
+    public private(set) var keepsOneNetwork = false
+    public private(set) var console: [ConsoleEntry] = []
     /// The name of a gadget that was just forgotten, for a note on the find screen.
-    var forgottenName: String?
+    public var forgottenName: String?
 
     private var wantsScan = false
     private var scanTimer: Task<Void, Never>?
@@ -48,14 +54,19 @@ final class GadgetStore {
     /// Bumped whenever the link changes or drops, so stale replies are ignored.
     private var generation = 0
 
-    init(link: any GadgetLink) {
+    public convenience init(link: any GadgetLink) {
+        self.init(link: link, scanDuration: .seconds(20))
+    }
+
+    init(link: any GadgetLink, scanDuration: Duration) {
+        self.scanDuration = scanDuration
         self.link = link
         self.radio = link.radio
         attach()
     }
 
     /// Swaps in another link (the debug menu's mock scenarios) and starts over.
-    func replaceLink(_ newLink: any GadgetLink) {
+    public func replaceLink(_ newLink: any GadgetLink) {
         link.onEvent = nil
         link.stopScan()
         link.disconnect()
@@ -82,13 +93,13 @@ final class GadgetStore {
 
     // MARK: Scanning
 
-    func startScan() {
+    public func startScan() {
         wantsScan = true
         scanEnded = false
         if radio == .poweredOn { beginScan() }
     }
 
-    func stopScan() {
+    public func stopScan() {
         wantsScan = false
         endScan()
     }
@@ -99,8 +110,9 @@ final class GadgetStore {
         isScanning = true
         link.startScan()
         scanTimer?.cancel()
+        let duration = scanDuration
         scanTimer = Task { [weak self] in
-            try? await Task.sleep(for: Self.scanDuration)
+            try? await Task.sleep(for: duration)
             guard !Task.isCancelled, let self, self.isScanning else { return }
             self.wantsScan = false
             self.scanEnded = true
@@ -117,7 +129,7 @@ final class GadgetStore {
 
     // MARK: Connecting
 
-    func connect(to target: DiscoveredGadget) {
+    public func connect(to target: DiscoveredGadget) {
         stopScan()
         forgottenName = nil
         resetConnection()
@@ -127,18 +139,18 @@ final class GadgetStore {
         link.connect(to: target)
     }
 
-    func retryPairing() {
+    public func retryPairing() {
         guard let gadget else { return backToFinding() }
         connect(to: gadget)
     }
 
     /// Reconnects after the link dropped.
-    func reconnect() {
+    public func reconnect() {
         retryPairing()
     }
 
     /// Leaves the pairing screen or the gadget and scans again.
-    func backToFinding() {
+    public func backToFinding() {
         link.disconnect()
         resetConnection()
         gadget = nil
@@ -155,6 +167,8 @@ final class GadgetStore {
         isRefreshing = false
         connectionLost = false
         settings = [:]
+        wifiNetworks = nil
+        keepsOneNetwork = false
     }
 
     private func handle(_ event: LinkEvent) {
@@ -211,7 +225,7 @@ final class GadgetStore {
 
     /// Sends one console line after any line already in flight, and returns its reply.
     @discardableResult
-    func send(_ line: String, typed: Bool = false) async -> Reply {
+    public func send(_ line: String, typed: Bool = false) async -> Reply {
         let previous = queueTail
         let task = Task { [weak self] () -> Reply in
             await previous?.value
@@ -257,6 +271,8 @@ final class GadgetStore {
             if let key = SettingKey(rawValue: value.key) { settings[key] = value.value }
         case .phone(let phone):
             status?.phone = phone
+        case .wifi(let list):
+            wifiNetworks = list
         case .ok:
             let words = line.trimmingCharacters(in: .whitespaces).split(separator: " ", maxSplits: 2).map(String.init)
             if words.count >= 2, words[0] == "set", let key = SettingKey(rawValue: words[1]) {
@@ -289,7 +305,7 @@ final class GadgetStore {
 
     /// Asks for `status`; returns whether a new one arrived.
     @discardableResult
-    func refreshStatus() async -> Bool {
+    public func refreshStatus() async -> Bool {
         guard stage == .connected, !connectionLost else { return false }
         isRefreshing = true
         defer { isRefreshing = false }
@@ -300,7 +316,7 @@ final class GadgetStore {
     }
 
     /// Reads every setting the store doesn't have yet (or all of them, when `all`).
-    func loadSettings(all: Bool = false) async {
+    public func loadSettings(all: Bool = false) async {
         guard !isLoadingSettings else { return }
         isLoadingSettings = true
         defer { isLoadingSettings = false }
@@ -311,21 +327,62 @@ final class GadgetStore {
     }
 
     /// Settings that haven't been read, for example after `@error device busy`.
-    var missingSettings: Bool {
+    public var missingSettings: Bool {
         settings.count < SettingKey.allCases.count
     }
 
     /// Sets a value; returns the gadget's error message, or nil when it was saved.
-    func save(_ key: SettingKey, _ value: String) async -> String? {
+    public func save(_ key: SettingKey, _ value: String) async -> String? {
         let value = value.replacingOccurrences(of: "\n", with: " ").trimmingCharacters(in: .whitespaces)
         let reply = await send("set \(key.rawValue) \(value)")
         guard case .ok = reply else { return reply.failureMessage ?? "The gadget didn't confirm." }
         return nil
     }
 
+    // MARK: Wi-Fi networks
+
+    /// Reads the saved networks (`wifiNetworks`). Returns an error message, or
+    /// nil when they arrived or the firmware keeps one network (`keepsOneNetwork`).
+    @discardableResult
+    public func loadWifiNetworks() async -> String? {
+        let reply = await send("wifi list")
+        switch reply {
+        case .wifi:
+            return nil
+        case .error(let message) where message.hasPrefix("unknown command"):
+            keepsOneNetwork = true
+            return nil
+        default:
+            return reply.failureMessage ?? "The gadget didn't answer."
+        }
+    }
+
+    /// Saves a network without joining it; an empty password saves an open network.
+    public func addWifi(_ ssid: String, password: String) async -> String? {
+        var line = "wifi add " + ConsoleArgument.quoted(ssid)
+        if !password.isEmpty { line += " " + ConsoleArgument.quoted(password) }
+        return await changeWifi(line)
+    }
+
+    /// Moves a saved network first; the gadget leaves its network and joins it.
+    public func joinWifi(_ ssid: String) async -> String? {
+        await changeWifi("wifi join " + ConsoleArgument.quoted(ssid))
+    }
+
+    public func forgetWifi(_ ssid: String) async -> String? {
+        await changeWifi("wifi forget " + ConsoleArgument.quoted(ssid))
+    }
+
+    private func changeWifi(_ line: String) async -> String? {
+        let reply = await send(line)
+        guard case .ok = reply else { return reply.failureMessage ?? "The gadget didn't confirm." }
+        await loadWifiNetworks()
+        return nil
+    }
+
     /// `phone forget`: the gadget removes every paired phone and drops the link.
     /// Returns an error message, or nil when it's done (see `forgotten()`).
-    func forget() async -> String? {
+    public func forget() async -> String? {
         let reply = await send("phone forget")
         guard case .ok = reply else { return reply.failureMessage ?? "The gadget didn't confirm." }
         return nil
@@ -333,7 +390,7 @@ final class GadgetStore {
 
     // MARK: Console
 
-    func clearConsole() {
+    public func clearConsole() {
         console = []
     }
 

@@ -1,3 +1,4 @@
+import GadgetKit
 import SwiftUI
 
 /// Pairing: connecting, waiting for the passkey that iOS asks for, and the

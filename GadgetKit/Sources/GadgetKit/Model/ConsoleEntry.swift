@@ -1,8 +1,8 @@
 import Foundation
 
 /// One line of console scrollback.
-struct ConsoleEntry: Identifiable, Equatable, Sendable {
-    enum Kind: Equatable, Sendable {
+public struct ConsoleEntry: Identifiable, Equatable, Sendable {
+    public enum Kind: Equatable, Sendable {
         /// A line sent to the gadget.
         case command
         case reply
@@ -10,10 +10,10 @@ struct ConsoleEntry: Identifiable, Equatable, Sendable {
         case note
     }
 
-    let id: Int
-    let kind: Kind
-    let text: String
+    public let id: Int
+    public let kind: Kind
+    public let text: String
     /// Typed in the console, rather than sent by the app's own screens.
-    let typed: Bool
+    public let typed: Bool
     let date: Date
 }

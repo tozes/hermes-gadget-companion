@@ -1,45 +1,12 @@
+import GadgetKit
 import SwiftUI
 
-/// The gadget's own connection, as its top bar shows it: a coloured link dot and a label.
-enum HermesLink: Equatable {
-    case noNetwork, network, connecting, online
-
-    init(_ status: GadgetStatus?) {
-        guard let status, status.network == true else {
-            self = .noNetwork
-            return
-        }
-        switch status.phase {
-        case .online: self = .online
-        case .connecting, .handshake: self = .connecting
-        default: self = .network
-        }
-    }
-
-    /// The firmware's top-bar label (`Ui::draw_top`).
-    var label: String {
-        switch self {
-        case .noNetwork: "NO NET"
-        case .network: "NET"
-        case .connecting: "LINK"
-        case .online: "ONLINE"
-        }
-    }
-
+extension HermesLink {
     var color: Color {
         switch self {
         case .noNetwork: Palette.red
         case .network, .connecting: Palette.yellow
         case .online: Palette.green
-        }
-    }
-
-    var spoken: String {
-        switch self {
-        case .noNetwork: "No network"
-        case .network: "On Wi-Fi"
-        case .connecting: "Connecting to Hermes"
-        case .online: "Online"
         }
     }
 }
@@ -93,36 +60,5 @@ struct StatusSummary {
         self.headlineColor = color
         self.detail = detail
         self.next = next
-    }
-}
-
-extension GadgetStatus.Power {
-    /// "84%, charging, USB power", or nil when the board doesn't report a battery.
-    var summary: String? {
-        guard available != false, batteryPresent != false, let percent = batteryPercent else {
-            return externalPower == true ? "USB power, no battery" : nil
-        }
-        var parts = ["\(percent)%"]
-        if charging == true { parts.append("charging") }
-        if externalPower == true { parts.append("USB power") } else { parts.append("on battery") }
-        return parts.joined(separator: ", ")
-    }
-
-    /// The device turns its battery red at this level or below, without USB power.
-    static let lowPercent = 10
-
-    /// Low as the device shows it: 10% or less, without USB power.
-    var isLow: Bool {
-        (batteryPercent ?? 100) <= Self.lowPercent && externalPower != true
-    }
-
-    /// The level and charging state for a battery icon, when there is a battery.
-    var gauge: (percent: Int, charging: Bool, low: Bool)? {
-        guard available != false, batteryPresent != false, let percent = batteryPercent else { return nil }
-        return (percent, charging == true, isLow)
-    }
-
-    var voltage: String? {
-        batteryMv.map { String(format: "%.2f V", Double($0) / 1000) }
     }
 }

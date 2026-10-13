@@ -1,7 +1,8 @@
+import GadgetKit
 import SwiftUI
 
 enum HomeRoute: Hashable {
-    case wifi, settings, console
+    case wifi, addWifi, settings, console
 }
 
 /// The connected gadget at a glance, with the way to every other screen.
@@ -56,6 +57,7 @@ struct DeviceHomeView: View {
             .navigationDestination(for: HomeRoute.self) { route in
                 switch route {
                 case .wifi: WifiSetupView()
+                case .addWifi: AddWifiNetworkView()
                 case .settings: SettingsView()
                 case .console: ConsoleView()
                 }
@@ -107,6 +109,10 @@ struct DeviceHomeView: View {
     }
 
     private var wifiSummary: String {
+        if let list = store.wifiNetworks, !list.networks.isEmpty {
+            let saved = list.networks.count == 1 ? "1 network saved" : "\(list.networks.count) networks saved"
+            return list.current.map { "On \($0) · \(saved)" } ?? "Not connected · \(saved)"
+        }
         if let ssid = store.settings[.wifiSSID], !ssid.isEmpty {
             return store.status?.network == true ? "On \(ssid)" : "\(ssid), not connected"
         }

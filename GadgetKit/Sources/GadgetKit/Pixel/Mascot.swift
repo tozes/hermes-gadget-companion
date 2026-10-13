@@ -1,6 +1,9 @@
+#if canImport(CoreGraphics)
+import CoreGraphics
+#endif
 import Foundation
 
-enum MascotFrame: Sendable, Hashable {
+public enum MascotFrame: Sendable, Hashable {
     case idle, blink, talk
 }
 
@@ -12,10 +15,10 @@ struct MascotBitmapSource: Sendable {
 }
 
 /// A decoded 1-bit mascot frame: its ink as horizontal runs, one unit per pixel.
-struct MascotBitmap: Sendable {
-    let size: Int
+public struct MascotBitmap: Sendable {
+    public let size: Int
     let frame: MascotFrame
-    let runs: [CGRect]
+    public let runs: [CGRect]
 
     init(_ source: MascotBitmapSource) {
         size = source.size
@@ -43,14 +46,14 @@ struct MascotBitmap: Sendable {
 }
 
 /// The Hermes Agent mascot frames from the firmware (64, 96, 144 and 192 px).
-enum Mascot {
+public enum Mascot {
     static let bitmaps: [MascotBitmap] = MascotFrames.encoded.map(MascotBitmap.init)
 
     /// A bitmap and a whole number of device pixels per art pixel for `side`
     /// points: the most detailed bitmap that still fills at least three
     /// quarters of what the best-filling one would. Falls back to the
     /// smallest bitmap, scaled down, when none fits at 1:1.
-    static func pick(frame: MascotFrame, side: CGFloat, displayScale: CGFloat) -> (bitmap: MascotBitmap, pixel: CGFloat)? {
+    public static func pick(frame: MascotFrame, side: CGFloat, displayScale: CGFloat) -> (bitmap: MascotBitmap, pixel: CGFloat)? {
         let candidates = bitmaps.filter { $0.frame == frame }
         let devicePixels = side * displayScale
         let fits = candidates.compactMap { bitmap -> (bitmap: MascotBitmap, factor: CGFloat)? in

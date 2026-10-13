@@ -16,9 +16,16 @@ let package = Package(
             targets: ["HermesCompanion"]
         ),
     ],
+    dependencies: [
+        // The app's logic, in its own package so its tests run on Linux:
+        // `swift test --package-path GadgetKit`.
+        .package(path: "GadgetKit"),
+    ],
     targets: [
+        // The iOS app: SwiftUI screens and the Core Bluetooth link.
         .target(
-            name: "HermesCompanion"
+            name: "HermesCompanion",
+            dependencies: [.product(name: "GadgetKit", package: "GadgetKit")]
         ),
     ]
 )

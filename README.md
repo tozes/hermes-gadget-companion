@@ -26,6 +26,8 @@ xtool dev build       # builds xtool/HermesCompanion.app
 xtool dev             # builds, signs and installs on a connected iPhone
 ```
 
+The app's logic is in the `GadgetKit` package, which needs only Foundation: `swift test --package-path GadgetKit` runs its tests on Linux or macOS.
+
 Installing on a phone needs `xtool auth login` with your Apple ID. Without a paid developer account, the app's signature expires after seven days and needs reinstalling.
 
 ## License

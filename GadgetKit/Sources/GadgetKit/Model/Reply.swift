@@ -2,12 +2,13 @@ import Foundation
 
 /// One reply from the gadget's console. Machine-readable replies start with
 /// `@` and a tag; JSON tags are decoded, anything else is kept as text.
-enum Reply: Equatable, Sendable {
+public enum Reply: Equatable, Sendable {
     case status(GadgetStatus)
     case value(SettingValue)
     case ok(String)
     case error(String)
     case phone(PhoneState)
+    case wifi(WifiNetworkList)
     /// `@help`, `@diag`, a log dump, or JSON that didn't decode.
     case other(tag: String, body: String)
 
@@ -26,6 +27,7 @@ enum Reply: Equatable, Sendable {
         case "status": return decode(body).map(Reply.status) ?? .other(tag: tag, body: body)
         case "value": return decode(body).map(Reply.value) ?? .other(tag: tag, body: body)
         case "phone": return decode(body).map(Reply.phone) ?? .other(tag: tag, body: body)
+        case "wifi": return decode(body).map(Reply.wifi) ?? .other(tag: tag, body: body)
         default: return .other(tag: tag, body: body)
         }
     }

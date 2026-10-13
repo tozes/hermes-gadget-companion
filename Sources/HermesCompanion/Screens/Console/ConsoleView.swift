@@ -1,3 +1,4 @@
+import GadgetKit
 import SwiftUI
 
 /// A raw terminal for developers: type a console line, see the reply.
