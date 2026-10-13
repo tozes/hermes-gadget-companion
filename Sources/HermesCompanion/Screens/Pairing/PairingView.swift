@@ -13,8 +13,6 @@ struct PairingView: View {
             TopBar(title: name, linkColor: dotColor, linkLabel: "PAIR", spokenState: "Pairing")
             ScrollView {
                 VStack(spacing: 28) {
-                    device
-                        .frame(maxWidth: 300)
                     HeaderBand(indicator: indicator, headline: headline, color: headlineColor, detail: detail)
                     actions
                 }
@@ -25,26 +23,6 @@ struct PairingView: View {
                 .background(Palette.background)
         }
         .background(Palette.background.ignoresSafeArea())
-    }
-
-    // MARK: The gadget, as it looks right now
-
-    @ViewBuilder
-    private var device: some View {
-        switch store.pairing {
-        case .connecting:
-            DeviceScreen(dot: Palette.yellow, headline: "Phone app", headlineColor: Palette.accent,
-                         lines: ["connecting"], hint: "Keep it close",
-                         spoken: "Gadget screen: Phone app, connecting")
-        case .awaitingPasskey:
-            DeviceScreen(dot: Palette.yellow, headline: "Code ######", headlineColor: Palette.accent,
-                         lines: ["Type it on", "your phone"], hint: "2 minutes",
-                         spoken: "Gadget screen: shows the six-digit code to type on your phone")
-        case .failed:
-            DeviceScreen(dot: Palette.red, headline: "Not paired", headlineColor: Palette.red,
-                         hint: "Phone app",
-                         spoken: "Gadget screen: not paired")
-        }
     }
 
     // MARK: Header
@@ -83,6 +61,8 @@ struct PairingView: View {
         switch store.pairing {
         case .connecting:
             "Keep your iPhone near the gadget."
+        case .awaitingPasskey where store.isDemo:
+            "With a real gadget, iPhone asks for the six digits shown on \(name)'s screen. In the demo, pairing finishes by itself."
         case .awaitingPasskey:
             "iPhone is asking for a pairing code. Type the six digits shown on \(name)'s screen. Only the gadget and iPhone see the code, so it never appears in this app."
         case .failed(.pairingRejected):

@@ -1,7 +1,6 @@
 import SwiftUI
 
-/// The gadget's colours, from the firmware renderer (`ui.cpp`), plus the
-/// project site's device shell for the one surface the device doesn't have.
+/// The gadget's colours, from the firmware renderer (`ui.cpp`).
 enum Palette {
     static let background = rgb(10, 14, 20)
     static let bar = rgb(24, 31, 42)
@@ -20,13 +19,6 @@ enum Palette {
 
     /// Dark text on amber, from the site (`--accent-ink`).
     static let accentInk = rgb(26, 18, 3)
-
-    /// The site's brushed-metal device shell (`home.css`).
-    static let shellEdge = rgb(120, 128, 138)
-    static let shellLight = rgb(102, 113, 122)
-    static let shellDark = rgb(34, 41, 48)
-    static let shellDeep = rgb(17, 22, 28)
-    static let shellSheen = rgb(85, 96, 106)
 
     private static func rgb(_ r: Double, _ g: Double, _ b: Double) -> Color {
         Color(.sRGB, red: r / 255, green: g / 255, blue: b / 255)

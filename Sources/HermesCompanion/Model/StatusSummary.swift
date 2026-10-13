@@ -1,16 +1,6 @@
 import GadgetKit
 import SwiftUI
 
-extension HermesLink {
-    var color: Color {
-        switch self {
-        case .noNetwork: Palette.red
-        case .network, .connecting: Palette.yellow
-        case .online: Palette.green
-        }
-    }
-}
-
 /// What the device home says about a status: the hero's headline, detail and indicator.
 struct StatusSummary {
     enum NextStep {

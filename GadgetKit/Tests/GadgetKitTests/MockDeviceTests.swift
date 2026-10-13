@@ -93,6 +93,28 @@ struct MockDeviceTests {
         #expect(status.pairingCode == nil)
     }
 
+    /// What "Try the demo" opens on: set up, approved, on battery, two saved networks.
+    @Test func demoIsASetUpGadget() {
+        var device = MockDevice.nox(.demo)
+        guard case .status(let status) = Reply.parse(device.handle("status", now: now)) else {
+            Issue.record("status didn't decode")
+            return
+        }
+        #expect(status.phase == .online)
+        #expect(status.paired == true)
+        #expect(status.network == true)
+        #expect(status.power?.batteryPercent == 76)
+        #expect(status.power?.charging == false)
+        #expect(status.power?.externalPower == false)
+        guard case .wifi(let list) = Reply.parse(device.handle("wifi list", now: now)) else {
+            Issue.record("wifi list didn't decode")
+            return
+        }
+        #expect(list.networks.map(\.ssid) == ["Lisbon Loft", "Pocket Hotspot"])
+        #expect(list.networks.allSatisfy { $0.tested })
+        #expect(list.current == "Lisbon Loft")
+    }
+
     @Test func awaitingApprovalShowsThePairingCode() {
         var device = MockDevice.nox(.awaitingApproval)
         guard case .status(let status) = Reply.parse(device.handle("status", now: now)) else {

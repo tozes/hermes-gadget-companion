@@ -4,6 +4,8 @@ import Foundation
 /// any screen's title) or with the launch argument `-mockScenario <rawValue>`.
 /// Without one, the app uses real Bluetooth.
 public enum MockScenario: String, CaseIterable, Identifiable, Sendable {
+    /// What "Try the demo" shows: a set-up gadget to explore, not saved across launches.
+    case demo
     case newGadget
     case online
     case awaitingApproval
@@ -29,6 +31,7 @@ public enum MockScenario: String, CaseIterable, Identifiable, Sendable {
 
     public var title: String {
         switch self {
+        case .demo: "Demo"
         case .newGadget: "New gadget, no Wi-Fi"
         case .online: "Online and approved"
         case .awaitingApproval: "Waiting for Hermes approval"
@@ -46,6 +49,7 @@ public enum MockScenario: String, CaseIterable, Identifiable, Sendable {
 
     public var detail: String {
         switch self {
+        case .demo: "What Try the demo shows: set up, approved, on battery, with two saved networks."
         case .newGadget: "The status from a real device: no network, not approved. Wi-Fi setup succeeds."
         case .online: "Set up, approved, charging over USB."
         case .awaitingApproval: "Online, showing a pairing code for the Hermes host."

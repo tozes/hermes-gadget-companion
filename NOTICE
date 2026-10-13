@@ -33,5 +33,5 @@ https://github.com/Adolanium/hermes-gadget-sdk, MIT License, Copyright (c) 2026
 Hermes Gadget SDK contributors.
 
 The colours follow the SDK's firmware renderer (firmware/core/src/ui.cpp) and
-project site (site/src/styles.css, site/src/home.css), from the same repository
+project site (site/src/styles.css), from the same repository
 and license.

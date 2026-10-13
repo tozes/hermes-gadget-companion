@@ -12,6 +12,9 @@ struct FindGadgetView: View {
             ScrollView {
                 VStack(spacing: 28) {
                     hero
+                    if store.isDemo {
+                        DemoNote(detail: "These gadgets are pretend, so you can look around without one. Pick one to see pairing; there's no code to type.")
+                    }
                     if let name = store.forgottenName {
                         forgottenNote(name)
                     }
@@ -20,9 +23,15 @@ struct FindGadgetView: View {
                     } else if store.radio == .unauthorized {
                         GadgetButton("Open Settings") { openSettings() }
                     }
-                    VStack(alignment: .leading, spacing: 12) {
-                        SectionLabel("Make a gadget appear")
-                        PairingSteps()
+                    if !store.isDemo {
+                        VStack(alignment: .leading, spacing: 12) {
+                            SectionLabel("Make a gadget appear")
+                            PairingSteps()
+                        }
+                        VStack(alignment: .leading, spacing: 12) {
+                            SectionLabel("No gadget yet?")
+                            GadgetButton("Try the demo", kind: .secondary) { store.startDemo() }
+                        }
                     }
                 }
                 .padding(.horizontal, 20)
@@ -109,7 +118,8 @@ struct FindGadgetView: View {
     // MARK: Top bar and hint
 
     private var radioColor: Color {
-        switch store.radio {
+        if store.isDemo { return Palette.accent }
+        return switch store.radio {
         case .poweredOn: Palette.green
         case .unknown: Palette.yellow
         default: Palette.red
@@ -117,7 +127,8 @@ struct FindGadgetView: View {
     }
 
     private var radioLabel: String {
-        switch store.radio {
+        if store.isDemo { return "DEMO" }
+        return switch store.radio {
         case .poweredOn: store.isScanning ? "SCAN" : "BT"
         case .unknown: "BT"
         default: "NO BT"
@@ -125,7 +136,8 @@ struct FindGadgetView: View {
     }
 
     private var radioSpoken: String {
-        switch store.radio {
+        if store.isDemo { return "Demo" }
+        return switch store.radio {
         case .poweredOn: store.isScanning ? "Bluetooth on, scanning" : "Bluetooth on"
         case .unknown: "Bluetooth starting"
         case .poweredOff: "Bluetooth off"

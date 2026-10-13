@@ -392,6 +392,15 @@ struct GadgetStoreTests {
 
     // MARK: Replacing the link
 
+    @Test func onlyTheDemoScenarioIsTheDemo() {
+        let store = GadgetStore(link: link)
+        #expect(!store.isDemo)
+        store.replaceLink(MockGadgetLink(scenario: .demo))
+        #expect(store.isDemo)
+        store.replaceLink(MockGadgetLink(scenario: .online))
+        #expect(!store.isDemo)
+    }
+
     @Test func replaceLinkStartsOver() async {
         let store = await connectedNox()
         let other = FakeGadgetLink()

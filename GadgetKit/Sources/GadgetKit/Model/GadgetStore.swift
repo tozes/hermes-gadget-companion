@@ -66,6 +66,11 @@ public final class GadgetStore {
     }
 
     /// Swaps in another link (the debug menu's mock scenarios) and starts over.
+    /// The app is showing the demo: a mock gadget, not real Bluetooth.
+    public var isDemo: Bool {
+        (link as? MockGadgetLink)?.scenario == .demo
+    }
+
     public func replaceLink(_ newLink: any GadgetLink) {
         link.onEvent = nil
         link.stopScan()
