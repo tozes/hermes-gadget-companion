@@ -1,0 +1,4 @@
+version: 1
+bundleID: com.tozes.HermesCompanion
+# Merged into the generated Info.plist: the Bluetooth permission prompt's text.
+infoPath: Info.plist
