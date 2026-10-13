@@ -3,10 +3,10 @@ import Foundation
 /// A `GadgetLink` that acts out a `MockScenario` with realistic delays:
 /// two gadgets nearby, iOS's passkey pairing, and console replies from `MockDevice`.
 @MainActor
-final class MockGadgetLink: GadgetLink {
-    var onEvent: (@MainActor (LinkEvent) -> Void)?
-    private(set) var radio: RadioState = .unknown
-    let scenario: MockScenario
+public final class MockGadgetLink: GadgetLink {
+    public var onEvent: (@MainActor (LinkEvent) -> Void)?
+    public private(set) var radio: RadioState = .unknown
+    public let scenario: MockScenario
 
     private static let noxID = UUID(uuidString: "6E0B9C1A-4F2D-4C8E-9B57-3A1D2C4F7E01")!
     private static let kitchenID = UUID(uuidString: "6E0B9C1A-4F2D-4C8E-9B57-3A1D2C4F7E02")!
@@ -21,7 +21,7 @@ final class MockGadgetLink: GadgetLink {
     private var isConnecting = false
     private var commandCount = 0
 
-    init(scenario: MockScenario) {
+    public init(scenario: MockScenario) {
         self.scenario = scenario
         devices = [Self.noxID: .nox(scenario), Self.kitchenID: .kitchen()]
         // Core Bluetooth starts in .unknown and reports the real state a moment later.
@@ -33,7 +33,7 @@ final class MockGadgetLink: GadgetLink {
 
     // MARK: Debug actions
 
-    func setRadio(_ state: RadioState) {
+    public func setRadio(_ state: RadioState) {
         radio = state
         if state != .poweredOn {
             scanTask?.cancel()
@@ -43,12 +43,12 @@ final class MockGadgetLink: GadgetLink {
     }
 
     /// Hermes approves Nox, as `hermes pairing approve` would.
-    func approveOnHermes() {
+    public func approveOnHermes() {
         devices[Self.noxID]?.approve()
     }
 
     /// The link drops, as if the gadget went out of range.
-    func drop() {
+    public func drop() {
         connectTask?.cancel()
         dropTask?.cancel()
         guard let id = connected else {
@@ -65,7 +65,7 @@ final class MockGadgetLink: GadgetLink {
 
     // MARK: GadgetLink
 
-    func startScan() {
+    public func startScan() {
         guard radio == .poweredOn else { return }
         scanTask?.cancel()
         guard scenario != .nothingNearby else { return }
@@ -87,12 +87,12 @@ final class MockGadgetLink: GadgetLink {
         }
     }
 
-    func stopScan() {
+    public func stopScan() {
         scanTask?.cancel()
         scanTask = nil
     }
 
-    func connect(to gadget: DiscoveredGadget) {
+    public func connect(to gadget: DiscoveredGadget) {
         connectTask?.cancel()
         isConnecting = true
         connectTask = Task { [weak self] in
@@ -131,7 +131,7 @@ final class MockGadgetLink: GadgetLink {
         }
     }
 
-    func disconnect() {
+    public func disconnect() {
         connectTask?.cancel()
         isConnecting = false
         dropTask?.cancel()
@@ -139,7 +139,7 @@ final class MockGadgetLink: GadgetLink {
         connected = nil
     }
 
-    func send(_ line: String) async throws -> String {
+    public func send(_ line: String) async throws -> String {
         guard let id = connected else { throw SendError.notConnected }
         commandCount += 1
         if scenario == .flaky, commandCount % 4 == 0 {

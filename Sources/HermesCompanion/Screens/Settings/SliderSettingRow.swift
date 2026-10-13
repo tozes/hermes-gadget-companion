@@ -1,3 +1,4 @@
+import GadgetKit
 import SwiftUI
 
 /// A percentage setting (volume, brightness), saved when the slider is released.

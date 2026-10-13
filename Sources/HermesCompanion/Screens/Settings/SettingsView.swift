@@ -1,3 +1,4 @@
+import GadgetKit
 import SwiftUI
 
 /// The gadget's settings, read with `get` and written with `set`. Each one

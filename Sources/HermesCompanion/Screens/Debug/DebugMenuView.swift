@@ -1,3 +1,4 @@
+import GadgetKit
 import SwiftUI
 
 /// The hidden debug menu: switch mock scenarios and trigger mock events.

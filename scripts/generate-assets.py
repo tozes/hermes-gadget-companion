@@ -4,7 +4,7 @@
     python3 scripts/generate-assets.py ~/dev/hermes-gadget-sdk-ble
 
 Writes Sources/HermesCompanion/Pixel/PixelFontGlyphs.swift (from
-firmware/core/src/font5x7.cpp) and Sources/HermesCompanion/Pixel/MascotFrames.swift
+firmware/core/src/font5x7.cpp) and GadgetKit/Sources/GadgetKit/Pixel/MascotFrames.swift
 (from firmware/core/src/mascot_data.cpp). The glyphs stay ASCII art so they are
 reviewable in a diff; the mascot bitmaps become base64 strings, which compile
 much faster than large byte-array literals.
@@ -16,7 +16,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "Sources" / "HermesCompanion" / "Pixel"
+FONT_OUT = ROOT / "Sources" / "HermesCompanion" / "Pixel" / "PixelFontGlyphs.swift"
+MASCOT_OUT = ROOT / "GadgetKit" / "Sources" / "GadgetKit" / "Pixel" / "MascotFrames.swift"
 
 
 def font(sdk: Path) -> str:
@@ -76,11 +77,10 @@ def main() -> None:
     if len(sys.argv) != 2:
         sys.exit(__doc__)
     sdk = Path(sys.argv[1]).expanduser()
-    OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / "PixelFontGlyphs.swift").write_text(font(sdk))
-    (OUT / "MascotFrames.swift").write_text(mascot(sdk))
-    print(f"wrote {OUT / 'PixelFontGlyphs.swift'}")
-    print(f"wrote {OUT / 'MascotFrames.swift'}")
+    for out, text in ((FONT_OUT, font(sdk)), (MASCOT_OUT, mascot(sdk))):
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(text)
+        print(f"wrote {out}")
 
 
 if __name__ == "__main__":

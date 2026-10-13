@@ -1,3 +1,4 @@
+import GadgetKit
 import SwiftUI
 
 /// The mascot, pixel for pixel: white 1-bit art at the largest whole-pixel

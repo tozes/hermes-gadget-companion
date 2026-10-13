@@ -26,6 +26,19 @@ struct MockDevice {
     var hermesWorks = true
     private var joinStarted: Date?
 
+    /// The saved Wi-Fi networks, first one tried first. The first is mirrored
+    /// into `wifi_ssid` / `wifi_pass`, as the firmware does.
+    struct SavedNetwork: Equatable {
+        var ssid: String
+        var password: String
+        var tested: Bool
+    }
+    var networks: [SavedNetwork] = []
+    /// The network the gadget is on (or last joined) while `network` is up.
+    private var joinedSSID: String?
+    private var joinedPassword: String?
+    static let maxNetworks = 5
+
     static let pairingCode = "YGJEQNXU"
 
     /// Nox: the device behind the real status sample in the design brief.
@@ -40,7 +53,10 @@ struct MockDevice {
             board: "esp32s3-touch-amoled-1.75c"
         )
         switch scenario {
-        case .online, .flaky:
+        case .online:
+            device.goOnline(approved: true)
+            device.networks.append(SavedNetwork(ssid: "Pocket Hotspot", password: "hotspot-pass", tested: false))
+        case .flaky:
             device.goOnline(approved: true)
         case .awaitingApproval:
             device.goOnline(approved: false)
@@ -85,6 +101,11 @@ struct MockDevice {
             settings["wifi_ssid"] = "Lisbon Loft"
             settings["wifi_pass"] = "correct horse"
         }
+        if networks.isEmpty {
+            networks = [SavedNetwork(ssid: settings["wifi_ssid", default: ""], password: settings["wifi_pass", default: ""], tested: true)]
+        }
+        joinedSSID = networks.first?.ssid
+        joinedPassword = networks.first?.password
         if settings["token", default: ""].isEmpty, approved { settings["token"] = "tok" }
     }
 
@@ -99,7 +120,14 @@ struct MockDevice {
         guard let joinStarted else { return }
         let elapsed = now.timeIntervalSince(joinStarted)
         guard wifiWorks, !settings["wifi_ssid", default: ""].isEmpty else { return }
-        if elapsed >= 3 { network = true; phase = "connecting"; screen = "connecting" }
+        if elapsed >= 3, !network {
+            network = true
+            phase = "connecting"
+            screen = "connecting"
+            joinedSSID = settings["wifi_ssid"]
+            joinedPassword = settings["wifi_pass"]
+            if !networks.isEmpty { networks[0].tested = true }
+        }
         guard hermesWorks else { return }
         if elapsed >= 4.5 { phase = "handshake" }
         if elapsed >= 6 {
@@ -119,7 +147,8 @@ struct MockDevice {
         switch command {
         case "help":
             return "@help commands: status | diag [log] | get <key> | set <key> <value> | say <text> | talk | release | "
-                + "cancel | new-session | settings [close] | wifi-setup [close] | phone [pair [close] | forget] | yes | no | "
+                + "cancel | new-session | settings [close] | wifi-setup [close] | wifi [list | add <ssid> [password] | join <ssid> | "
+                + "forget <ssid>] | phone [pair [close] | forget] | yes | no | "
                 + "reconnect | forget-key | factory-reset   keys: name server token talk_mode volume brightness "
                 + "screen_timeout battery_display wifi_ssid wifi_pass"
         case "status":
@@ -134,6 +163,8 @@ struct MockDevice {
             }
         case "get", "set":
             return setting(command, rest, now: now)
+        case "wifi":
+            return wifi(rest, now: now)
         case "diag":
             if rest == "log" {
                 return "I (1203) hg: boot\nI (1450) hg: phone app ready\nI (2210) hg: phase \(phase)\n@log end"
@@ -170,14 +201,112 @@ struct MockDevice {
         if key == "battery_display", !value.isEmpty, !["icon", "percentage", "both", "off"].contains(value) {
             return "@error battery_display must be icon, percentage, both or off"
         }
-        settings[key] = value
-        if key == "wifi_ssid" || key == "wifi_pass" {
-            network = false
-            phase = "no_network"
-            screen = "offline"
-            joinStarted = now
+        switch key {
+        case "wifi_ssid":
+            // The first saved network: a new name goes first and keeps the others.
+            if value.isEmpty {
+                if !networks.isEmpty { networks.removeFirst() }
+            } else {
+                let password = settings["wifi_pass", default: ""]
+                let same = networks.first { $0.ssid == value && $0.password == password }
+                putFirst(SavedNetwork(ssid: value, password: password, tested: same?.tested ?? false))
+            }
+            mirror()
+            rejoinIfNeeded(now: now)
+        case "wifi_pass":
+            if networks.isEmpty {
+                settings[key] = value
+            } else if networks[0].password != value {
+                networks[0].password = value
+                networks[0].tested = false
+            }
+            mirror()
+            rejoinIfNeeded(now: now)
+        default:
+            settings[key] = value
         }
         return "@ok \(key)"
+    }
+
+    /// `wifi [list | add <ssid> [password] | join <ssid> | forget <ssid>]` (`App::wifi_command`).
+    private mutating func wifi(_ rest: String, now: Date) -> String {
+        let usage = "@error usage: wifi [list | add <ssid> [password] | join <ssid> | forget <ssid>]"
+        let args = ConsoleArgument.split(rest)
+        let sub = args.first ?? "list"
+        if sub == "list" {
+            return args.count > 1 ? usage : "@wifi " + wifiJSON()
+        }
+        guard args.count >= 2, args.count <= (sub == "add" ? 3 : 2) else { return usage }
+        let ssid = args[1]
+        let saved = networks.firstIndex { $0.ssid == ssid }
+        switch sub {
+        case "add":
+            let password = args.count > 2 ? args[2] : ""
+            if let error = Self.networkError(ssid, password) { return "@error " + error }
+            if let saved {
+                if networks[saved].password != password {
+                    networks[saved].password = password
+                    networks[saved].tested = false
+                }
+            } else {
+                guard networks.count < Self.maxNetworks else { return "@error \(Self.maxNetworks) networks saved; forget one first" }
+                networks.append(SavedNetwork(ssid: ssid, password: password, tested: false))
+            }
+        case "join", "forget":
+            guard let saved else { return "@error no saved network \(ssid)" }
+            let network = networks.remove(at: saved)
+            if sub == "join" { networks.insert(network, at: 0) }
+        default:
+            return usage
+        }
+        mirror()
+        rejoinIfNeeded(now: now)
+        return "@ok wifi \(sub)"
+    }
+
+    /// The firmware's rules for a network it saves (`wifi_network_error`).
+    static func networkError(_ ssid: String, _ password: String) -> String? {
+        if ssid.isEmpty || ssid.utf8.count > 32 || ssid.contains("\0") { return "Network name must contain 1..32 bytes" }
+        let hexKey = password.utf8.count == 64 && password.allSatisfy(\.isHexDigit)
+        let printable = password.unicodeScalars.allSatisfy { $0.value >= 0x20 && $0.value <= 0x7e }
+        if !printable || (!password.isEmpty && !hexKey && !(8...63).contains(password.utf8.count)) {
+            return "Use an 8..63 character Wi-Fi password, a 64-digit hex key, or leave it empty for an open network"
+        }
+        return nil
+    }
+
+    private mutating func putFirst(_ saved: SavedNetwork) {
+        networks.removeAll { $0.ssid == saved.ssid }
+        if networks.count >= Self.maxNetworks { networks.removeLast() }
+        networks.insert(saved, at: 0)
+    }
+
+    private mutating func mirror() {
+        settings["wifi_ssid"] = networks.first?.ssid ?? ""
+        settings["wifi_pass"] = networks.first?.password ?? ""
+    }
+
+    /// Like the firmware: stays on the network it's on if that is still first,
+    /// else leaves it and joins the first saved network.
+    private mutating func rejoinIfNeeded(now: Date) {
+        if network, let first = networks.first, first.ssid == joinedSSID, first.password == joinedPassword {
+            return
+        }
+        network = false
+        phase = "no_network"
+        screen = "offline"
+        joinedSSID = nil
+        joinedPassword = nil
+        joinStarted = networks.isEmpty ? nil : now
+    }
+
+    func wifiJSON() -> String {
+        let list = networks.map {
+            "{\"ssid\":\(Self.json($0.ssid)),\"tested\":\($0.tested),\"open\":\($0.password.isEmpty)}"
+        }
+        var out = "{\"networks\":[" + list.joined(separator: ",") + "],\"max\":\(Self.maxNetworks)"
+        if network, let joinedSSID { out += ",\"current\":" + Self.json(joinedSSID) }
+        return out + "}"
     }
 
     func statusJSON() -> String {

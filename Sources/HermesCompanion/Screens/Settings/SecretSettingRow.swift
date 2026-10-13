@@ -1,3 +1,4 @@
+import GadgetKit
 import SwiftUI
 
 /// The Hermes access token: write-only. The gadget only says whether one is set.

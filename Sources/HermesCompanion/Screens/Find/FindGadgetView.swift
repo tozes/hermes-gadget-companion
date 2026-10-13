@@ -1,3 +1,4 @@
+import GadgetKit
 import SwiftUI
 
 /// Find a gadget: scan, list what's nearby, and explain how to make one appear.

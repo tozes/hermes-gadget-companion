@@ -1,3 +1,4 @@
+import GadgetKit
 import SwiftUI
 
 /// Shows the screen for where the app is: finding a gadget, pairing, or connected.

@@ -1,5 +1,6 @@
 import CoreBluetooth
 import Foundation
+import GadgetKit
 
 /// The real link: Core Bluetooth to the gadget's console service
 /// (`GadgetService`). Delegate callbacks arrive on the main queue.

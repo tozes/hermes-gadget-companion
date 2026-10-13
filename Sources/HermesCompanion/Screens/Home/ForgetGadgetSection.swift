@@ -1,3 +1,4 @@
+import GadgetKit
 import SwiftUI
 
 /// Forget this gadget (`phone forget`), after a confirmation that says what it does.

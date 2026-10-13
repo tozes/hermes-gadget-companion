@@ -1,3 +1,4 @@
+import GadgetKit
 import SwiftUI
 
 /// A text setting (name, server): edit, then Save or Return. Errors from

@@ -1,7 +1,7 @@
 import Foundation
 
 /// The gadget's setting keys (`get <key>` / `set <key> <value>`).
-enum SettingKey: String, CaseIterable, Sendable {
+public enum SettingKey: String, CaseIterable, Sendable {
     case name
     case server
     case token
@@ -16,22 +16,22 @@ enum SettingKey: String, CaseIterable, Sendable {
     /// `get` masks these as `<set>`.
     var isSecret: Bool { self == .token || self == .wifiPassword }
 
-    static let volumeRange = 0...100
-    static let brightnessRange = 5...100
+    public static let volumeRange = 0...100
+    public static let brightnessRange = 5...100
     static let screenTimeoutRange = 0...3600
 }
 
-enum TalkMode: String, CaseIterable, Sendable {
+public enum TalkMode: String, CaseIterable, Sendable {
     case hold, tap
 
-    var title: String {
+    public var title: String {
         switch self {
         case .hold: "Hold"
         case .tap: "Tap"
         }
     }
 
-    var explanation: String {
+    public var explanation: String {
         switch self {
         case .hold: "Hold the screen while you talk."
         case .tap: "Tap once to start talking, again to stop."
@@ -39,10 +39,10 @@ enum TalkMode: String, CaseIterable, Sendable {
     }
 }
 
-enum BatteryDisplay: String, CaseIterable, Sendable {
+public enum BatteryDisplay: String, CaseIterable, Sendable {
     case icon, percentage, both, off
 
-    var title: String {
+    public var title: String {
         switch self {
         case .icon: "Icon"
         case .percentage: "%"
@@ -51,7 +51,7 @@ enum BatteryDisplay: String, CaseIterable, Sendable {
         }
     }
 
-    var spokenTitle: String {
+    public var spokenTitle: String {
         switch self {
         case .icon: "Icon"
         case .percentage: "Percentage"

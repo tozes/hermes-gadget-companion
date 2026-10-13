@@ -1,3 +1,4 @@
+import GadgetKit
 import SwiftUI
 
 /// The gadget at a glance: power, connection, firmware and board, from `status`.

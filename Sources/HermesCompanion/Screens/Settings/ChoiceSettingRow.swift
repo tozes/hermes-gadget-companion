@@ -1,3 +1,4 @@
+import GadgetKit
 import SwiftUI
 
 /// A setting with a few fixed values (talk mode, battery indicator), saved on tap.

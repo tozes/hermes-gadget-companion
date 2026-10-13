@@ -1,7 +1,7 @@
 import Foundation
 
 /// The phone's Bluetooth radio, as Core Bluetooth reports it.
-enum RadioState: Sendable, Equatable {
+public enum RadioState: Sendable, Equatable {
     case unknown
     case poweredOn
     case poweredOff
@@ -12,14 +12,20 @@ enum RadioState: Sendable, Equatable {
 
 /// A gadget seen while scanning: it advertises the Hermes service while
 /// Phone app pairing is open, and about once a second while a phone is paired.
-struct DiscoveredGadget: Identifiable, Hashable, Sendable {
-    let id: UUID
-    var name: String
+public struct DiscoveredGadget: Identifiable, Hashable, Sendable {
+    public let id: UUID
+    public var name: String
     /// Signal strength in dBm.
     var rssi: Int
 
+    public init(id: UUID, name: String, rssi: Int) {
+        self.id = id
+        self.name = name
+        self.rssi = rssi
+    }
+
     /// 1 (weak) to 4 (strong).
-    var signalLevel: Int {
+    public var signalLevel: Int {
         switch rssi {
         case (-55)...: 4
         case (-67)...: 3
@@ -28,13 +34,13 @@ struct DiscoveredGadget: Identifiable, Hashable, Sendable {
         }
     }
 
-    var signalDescription: String {
+    public var signalDescription: String {
         ["weak", "fair", "good", "strong"][signalLevel - 1]
     }
 }
 
 /// Why a connection didn't come up or went away.
-enum LinkFailure: Error, Sendable, Equatable {
+public enum LinkFailure: Error, Sendable, Equatable {
     /// iOS reported that pairing failed: a wrong code, or the user cancelled the dialog.
     case pairingRejected
     /// No pairing happened in time: usually the gadget's pairing window had closed.
@@ -49,7 +55,7 @@ enum LinkFailure: Error, Sendable, Equatable {
 }
 
 /// What a link reports to its owner. All events arrive on the main actor.
-enum LinkEvent: Sendable, Equatable {
+public enum LinkEvent: Sendable, Equatable {
     case radio(RadioState)
     case discovered(DiscoveredGadget)
     case connecting
@@ -64,7 +70,7 @@ enum LinkEvent: Sendable, Equatable {
     case disconnected(LinkFailure?)
 }
 
-enum SendError: Error, Sendable, Equatable {
+public enum SendError: Error, Sendable, Equatable {
     case notConnected
     case timedOut
 }
@@ -74,7 +80,7 @@ enum SendError: Error, Sendable, Equatable {
 /// one `@` reply. `BluetoothGadgetLink` is the real one; `MockGadgetLink`
 /// acts out the debug menu's scenarios.
 @MainActor
-protocol GadgetLink: AnyObject {
+public protocol GadgetLink: AnyObject {
     /// Receives every event; the store sets it once.
     var onEvent: (@MainActor (LinkEvent) -> Void)? { get set }
     var radio: RadioState { get }

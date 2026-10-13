@@ -1,3 +1,4 @@
+import GadgetKit
 import SwiftUI
 
 @main

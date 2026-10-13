@@ -1,3 +1,4 @@
+import GadgetKit
 import SwiftUI
 
 /// Screen timeout: the device menu's presets, or any number of seconds up to

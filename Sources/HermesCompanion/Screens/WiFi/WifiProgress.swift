@@ -1,3 +1,4 @@
+import GadgetKit
 import SwiftUI
 
 /// The three stages of joining, each with the device's indicator for its state.
@@ -26,7 +27,7 @@ struct WifiProgress: View {
         case .failed: (1, true)
         case .reachingHermes: (2, false)
         case .noHermes: (2, true)
-        case .done: (3, false)
+        case .done, .saved: (3, false)
         }
     }
 
