@@ -76,7 +76,7 @@ struct DeviceHomeView: View {
 
     /// The mascot with the connection state under her, as on the find screen.
     private var header: some View {
-        let summary = StatusSummary(store.status)
+        let summary = store.connectionLost ? StatusSummary.connectionLost(name: name) : StatusSummary(store.status)
         return VStack(spacing: 8) {
             Hero(indicator: summary.indicator, headline: summary.headline, color: summary.headlineColor,
                  detail: summary.detail)
@@ -91,7 +91,7 @@ struct DeviceHomeView: View {
 
     @ViewBuilder
     private var nextStep: some View {
-        switch StatusSummary(store.status).next {
+        switch store.connectionLost ? nil : StatusSummary(store.status).next {
         case .setUpWifi:
             GadgetButton("Set up Wi-Fi") { path.append(.wifi) }
                 .disabled(store.connectionLost)
@@ -108,10 +108,11 @@ struct DeviceHomeView: View {
     private var topBar: some View {
         let status = store.status
         HStack(spacing: 10) {
-            if let network = status?.network {
+            // A dropped link leaves the last status behind: don't show it as current.
+            if !store.connectionLost, let network = status?.network {
                 WifiGlyph(connected: network, scale: 2)
             }
-            if let gauge = status?.power?.gauge {
+            if !store.connectionLost, let gauge = status?.power?.gauge {
                 BatteryGlyph(percent: gauge.percent, charging: gauge.charging, low: gauge.low, scale: 2)
             }
         }
@@ -121,6 +122,7 @@ struct DeviceHomeView: View {
 
     private var topBarSpoken: String {
         var parts: [String] = []
+        if store.connectionLost { return "" }
         if let network = store.status?.network { parts.append(network ? "Wi-Fi connected" : "No Wi-Fi") }
         if let gauge = store.status?.power?.gauge {
             parts.append("Battery \(gauge.percent) percent\(gauge.charging ? ", charging" : "")")

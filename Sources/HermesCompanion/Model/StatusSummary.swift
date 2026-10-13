@@ -41,6 +41,11 @@ struct StatusSummary {
         }
     }
 
+    /// The Bluetooth link dropped: the last status is stale, so it isn't shown.
+    static func connectionLost(name: String) -> StatusSummary {
+        StatusSummary(.alert, "Not connected", Palette.red, "Reconnect to see how \(name) is doing.")
+    }
+
     private init(
         _ indicator: StatusIndicator.Kind, _ headline: String, _ color: Color, _ detail: String,
         next: NextStep? = nil

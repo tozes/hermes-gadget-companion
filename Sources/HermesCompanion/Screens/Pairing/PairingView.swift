@@ -48,6 +48,7 @@ struct PairingView: View {
     private var headline: String {
         switch store.pairing {
         case .connecting: "Connecting to \(name)"
+        case .awaitingPasskey where store.isDemo: "Pairing"
         case .awaitingPasskey: "Enter the code"
         case .failed(.pairingRejected): "Pairing failed"
         case .failed(.pairingTimedOut): "Pairing timed out"
@@ -81,6 +82,7 @@ struct PairingView: View {
     private var hint: String {
         switch store.pairing {
         case .connecting: "Connecting"
+        case .awaitingPasskey where store.isDemo: "No code in the demo"
         case .awaitingPasskey: "The code is on the gadget"
         case .failed: "Pairing stays open 2 minutes"
         }
