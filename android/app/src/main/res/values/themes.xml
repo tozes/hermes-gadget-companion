@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark only: the window is the gadget's background until Compose draws. -->
+    <style name="Theme.Hermes" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:colorBackground">@color/background</item>
+    </style>
+</resources>

@@ -8,3 +8,14 @@ DerivedData/
 .netrc
 
 /xtool
+
+# Android (android/): Gradle and build outputs, and the local SDK path
+.gradle/
+.kotlin/
+build/
+local.properties
+*.apk
+*.aab
+captures/
+.idea/
+*.iml

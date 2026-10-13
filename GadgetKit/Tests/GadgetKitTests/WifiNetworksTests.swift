@@ -9,7 +9,7 @@ struct WifiNetworksTests {
     let link = FakeGadgetLink()
     let now = Date(timeIntervalSinceReferenceDate: 0)
 
-    static let twoSaved = #"@wifi {"networks":[{"ssid":"Lisbon Loft","tested":true,"open":false},{"ssid":"Pocket \"5G\"","tested":false,"open":true}],"max":5,"current":"Lisbon Loft"}"#
+    static let twoSaved = Fixture.reply("wifi-list")
 
     // MARK: Replies and arguments
 
@@ -29,7 +29,7 @@ struct WifiNetworksTests {
     }
 
     @Test func listWithoutCurrentNetwork() {
-        guard case .wifi(let list) = Reply.parse(#"@wifi {"networks":[],"max":5}"#) else {
+        guard case .wifi(let list) = Reply.parse(Fixture.reply("wifi-none")) else {
             Issue.record("not a wifi list")
             return
         }
@@ -38,7 +38,7 @@ struct WifiNetworksTests {
     }
 
     @Test func missingFieldsGetDefaults() {
-        guard case .wifi(let list) = Reply.parse(#"@wifi {"networks":[{"ssid":"A"}]}"#) else {
+        guard case .wifi(let list) = Reply.parse(Fixture.reply("wifi-minimal")) else {
             Issue.record("not a wifi list")
             return
         }
@@ -87,7 +87,7 @@ struct WifiNetworksTests {
     }
 
     @Test func olderFirmwareKeepsOneNetwork() async {
-        let store = await store { _ in "@error unknown command (try: help)" }
+        let store = await store { _ in Fixture.reply("error-unknown-command") }
         #expect(await store.loadWifiNetworks() == nil)
         #expect(store.keepsOneNetwork)
         #expect(store.wifiNetworks == nil)
@@ -128,7 +128,7 @@ struct WifiNetworksTests {
         return #"@wifi {"networks":[{"ssid":"Pocket","tested":false,"open":false},{"ssid":"Lisbon Loft","tested":true,"open":false}],"max":5\#(field)}"#
     }
 
-    private static let online = #"@status {"name":"Nox","network":true,"phase":"online","paired":true}"#
+    private static let online = Fixture.reply("status-online")
 
     @Test func joinsANewNetworkUntilItIsCurrent() async {
         // The gadget stays on its old network for a moment after `wifi join`.
@@ -172,7 +172,7 @@ struct WifiNetworksTests {
     }
 
     @Test func aRefusedPasswordShowsUnderThePasswordField() async {
-        let store = await store { _ in "@error Use an 8..63 character Wi-Fi password, a 64-digit hex key, or leave it empty for an open network" }
+        let store = await store { _ in Fixture.reply("error-wifi-password") }
         let join = join()
         await join.join(store: store, ssid: "Pocket", newPassword: "short")
         #expect(join.step == .editing)
@@ -192,7 +192,7 @@ struct WifiNetworksTests {
     }
 
     @Test func aFullListIsRefusedUnderTheName() async {
-        let store = await store { _ in "@error 5 networks saved; forget one first" }
+        let store = await store { _ in Fixture.reply("error-wifi-full") }
         let join = join()
         await join.save(store: store, ssid: "Sixth", password: "")
         #expect(join.step == .editing)
@@ -231,7 +231,7 @@ struct WifiNetworksTests {
         #expect(device.handle(#"wifi add """#, now: now).hasPrefix("@error Network name"))
         #expect(device.handle("wifi join Elsewhere", now: now) == "@error no saved network Elsewhere")
         for i in 0..<3 { #expect(device.handle("wifi add Net\(i)", now: now) == "@ok wifi add") }
-        #expect(device.handle("wifi add Net3", now: now) == "@error 5 networks saved; forget one first")
+        #expect(device.handle("wifi add Net3", now: now) == Fixture.reply("error-wifi-full"))
         #expect(device.handle("wifi add", now: now).hasPrefix("@error usage"))
         #expect(device.handle("wifi rename a", now: now).hasPrefix("@error usage"))
     }

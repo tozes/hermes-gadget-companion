@@ -1,0 +1,1 @@
+@wifi {"networks":[{"ssid":"Lisbon Loft","tested":true,"open":false},{"ssid":"Pocket \"5G\"","tested":false,"open":true}],"max":5,"current":"Lisbon Loft"}

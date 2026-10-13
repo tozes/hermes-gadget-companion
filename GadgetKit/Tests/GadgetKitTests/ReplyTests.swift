@@ -13,33 +13,33 @@ struct ReplyTests {
     }
 
     @Test func value() {
-        #expect(Reply.parse(#"@value {"key":"volume","value":"70"}"#) == .value(SettingValue(key: "volume", value: "70")))
+        #expect(Reply.parse(Fixture.reply("value-volume")) == .value(SettingValue(key: "volume", value: "70")))
     }
 
     @Test func maskedSecretValue() {
-        #expect(Reply.parse(#"@value {"key":"wifi_pass","value":"<set>"}"#) == .value(SettingValue(key: "wifi_pass", value: SettingValue.maskedSecret)))
+        #expect(Reply.parse(Fixture.reply("value-secret")) == .value(SettingValue(key: "wifi_pass", value: SettingValue.maskedSecret)))
     }
 
     @Test func ok() {
-        #expect(Reply.parse("@ok volume") == .ok("volume"))
+        #expect(Reply.parse(Fixture.reply("ok-volume")) == .ok("volume"))
     }
 
     @Test func errors() {
-        let validation = Reply.parse("@error screen_timeout must be 0..3600 seconds")
+        let validation = Reply.parse(Fixture.reply("error-screen-timeout"))
         #expect(validation == .error("screen_timeout must be 0..3600 seconds"))
         #expect(validation.isError)
         #expect(validation.failureMessage == "screen_timeout must be 0..3600 seconds")
-        #expect(Reply.parse("@error device busy") == .error("device busy"))
+        #expect(Reply.parse(Fixture.reply("error-busy")) == .error("device busy"))
     }
 
     @Test func phone() {
-        #expect(Reply.parse(#"@phone {"paired":1,"connected":true,"pairing":false}"#) == .phone(PhoneState(paired: 1, connected: true, pairing: false)))
+        #expect(Reply.parse(Fixture.reply("phone")) == .phone(PhoneState(paired: 1, connected: true, pairing: false)))
     }
 
     @Test func unknownJSONFieldsAreIgnored() {
-        let reply = Reply.parse(#"@phone {"paired":2,"connected":false,"pairing":true,"slots":3,"extra":{"a":[1,2]}}"#)
+        let reply = Reply.parse(Fixture.reply("phone-extra-fields"))
         #expect(reply == .phone(PhoneState(paired: 2, connected: false, pairing: true)))
-        let value = Reply.parse(#"@value {"key":"name","value":"Nox","source":"nvs"}"#)
+        let value = Reply.parse(Fixture.reply("value-extra-fields"))
         #expect(value == .value(SettingValue(key: "name", value: "Nox")))
     }
 
@@ -48,9 +48,10 @@ struct ReplyTests {
     }
 
     @Test func helpAndDiagAreKeptAsText() {
-        let help = "@help commands: status | diag [log] | get <key>"
-        #expect(Reply.parse(help) == .other(tag: "help", body: "commands: status | diag [log] | get <key>"))
-        let diag = #"@diag {"build":"0.2.0","heap_free":182344}"#
+        let help = Fixture.reply("help")
+        #expect(Reply.parse(help) == .other(tag: "help", body: String(help.dropFirst("@help ".count))))
+        #expect(Reply.parse(help).failureMessage == "Unexpected reply: @help")
+        let diag = Fixture.reply("diag")
         #expect(Reply.parse(diag) == .other(tag: "diag", body: #"{"build":"0.2.0","heap_free":182344}"#))
     }
 
@@ -62,7 +63,8 @@ struct ReplyTests {
     }
 
     @Test func logDumpIsKeptWhole() {
-        let log = "I (1203) hg: boot\nI (1450) hg: phone app ready\n@log end"
+        let log = Fixture.reply("diag-log")
+        #expect(log.hasSuffix("\n@log end"))
         #expect(Reply.parse(log) == .other(tag: "", body: log))
     }
 

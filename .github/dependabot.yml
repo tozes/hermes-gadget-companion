@@ -1,5 +1,6 @@
-# Weekly update PRs for the workflows' actions. Updates wait a week after release before
-# they're proposed, so a release that gets pulled never reaches a PR.
+# Weekly update PRs for the workflows' actions and the Android app's Gradle dependencies.
+# Updates wait a week after release before they're proposed, so a release that gets pulled
+# never reaches a PR.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -13,3 +14,14 @@ updates:
         patterns: ["*"]
     commit-message:
       prefix: "CI"
+  - package-ecosystem: gradle
+    directory: /android
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      android:
+        patterns: ["*"]
+    commit-message:
+      prefix: "Android"

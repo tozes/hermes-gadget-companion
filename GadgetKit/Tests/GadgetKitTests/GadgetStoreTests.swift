@@ -212,7 +212,7 @@ struct GadgetStoreTests {
         // The second line waits for the first reply.
         #expect(link.sent == ["status", "get volume"])
 
-        link.answer(#"@value {"key":"volume","value":"70"}"#)
+        link.answer(Fixture.reply("value-volume"))
         #expect(await first.value == .value(SettingValue(key: "volume", value: "70")))
         #expect(await eventually { link.unanswered == 1 })
         #expect(link.sent == ["status", "get volume", "get brightness"])
@@ -228,7 +228,7 @@ struct GadgetStoreTests {
         let reply = Task { await store.send("get volume") }
         #expect(await eventually { link.unanswered == 1 })
         link.emit(.disconnected(.connectionLost))
-        link.answer(#"@value {"key":"volume","value":"70"}"#)
+        link.answer(Fixture.reply("value-volume"))
         #expect(await reply.value == .error("not connected"))
         #expect(store.settings[.volume] == nil)
         #expect(!store.console.contains { $0.kind == .reply && $0.text.contains("volume") })
@@ -320,7 +320,7 @@ struct GadgetStoreTests {
 
     @Test func errorIsReturnedToTheCaller() async {
         let store = await connectedNox()
-        link.respond = { _ in "@error screen_timeout must be 0..3600 seconds" }
+        link.respond = { _ in Fixture.reply("error-screen-timeout") }
         #expect(await store.save(.screenTimeout, "9999") == "screen_timeout must be 0..3600 seconds")
         #expect(store.settings[.screenTimeout] == nil)
     }
@@ -350,7 +350,7 @@ struct GadgetStoreTests {
         #expect(store.settings[.volume] == nil)
         // Only what's missing is asked again.
         let before = link.sent.count
-        link.respond = { _ in #"@value {"key":"volume","value":"70"}"# }
+        link.respond = { _ in Fixture.reply("value-volume") }
         await store.loadSettings()
         #expect(Array(link.sent[before...]) == ["get volume"])
         #expect(!store.missingSettings)
@@ -358,7 +358,7 @@ struct GadgetStoreTests {
 
     @Test func statusErrorIsKept() async {
         let store = await connectedNox()
-        link.respond = { _ in "@error device busy" }
+        link.respond = { _ in Fixture.reply("error-busy") }
         #expect(await store.refreshStatus() == false)
         #expect(store.statusError == "device busy")
         #expect(store.status?.name == "Nox")
@@ -387,7 +387,7 @@ struct GadgetStoreTests {
 
     @Test func refusedForgetStaysConnected() async {
         let store = await connectedNox()
-        link.respond = { _ in "@error device busy" }
+        link.respond = { _ in Fixture.reply("error-busy") }
         #expect(await store.forget() == "device busy")
         #expect(store.stage == .connected)
         #expect(store.forgottenName == nil)

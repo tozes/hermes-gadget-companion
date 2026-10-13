@@ -1,0 +1,3 @@
+I (1203) hg: boot
+I (1450) hg: phone app ready
+@log end

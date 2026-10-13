@@ -48,7 +48,7 @@ struct ReplyAssemblerTests {
 
     @Test func multiLineReply() {
         var assembler = ReplyAssembler()
-        let log = "I (1203) hg: boot\nI (1450) hg: phone app ready\n@log end"
+        let log = Fixture.reply("diag-log")
         let data = bytes(log)
         #expect(assembler.append(data.prefix(20)) == [])
         #expect(assembler.append(data.dropFirst(20)) == [log])

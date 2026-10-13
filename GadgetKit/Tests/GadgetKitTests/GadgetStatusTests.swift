@@ -41,7 +41,10 @@ struct GadgetStatusTests {
     }
 
     @Test func missingOptionalFields() throws {
-        let status = try decode(#"{"name":"Kitchen","phase":"online","power":{"available":false}}"#)
+        guard case .status(let status) = Reply.parse(Fixture.reply("status-no-battery")) else {
+            Issue.record("the sample didn't decode")
+            return
+        }
         #expect(status.name == "Kitchen")
         #expect(status.phase == .online)
         #expect(status.network == nil)
@@ -51,7 +54,10 @@ struct GadgetStatusTests {
     }
 
     @Test func pairingCode() throws {
-        let status = try decode(#"{"phase":"online","screen":"pairing","pairing_code":"YGJEQNXU","paired":false}"#)
+        guard case .status(let status) = Reply.parse(Fixture.reply("status-awaiting-approval")) else {
+            Issue.record("the sample didn't decode")
+            return
+        }
         #expect(status.pairingCode == "YGJEQNXU")
     }
 
