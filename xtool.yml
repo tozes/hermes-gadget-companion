@@ -2,3 +2,5 @@ version: 1
 bundleID: com.tozes.HermesCompanion
 # Merged into the generated Info.plist: the Bluetooth permission prompt's text.
 infoPath: Info.plist
+# Drawn by scripts/make-icon.py from the gadget's mascot bitmap.
+iconPath: AppIcon.png

@@ -6,7 +6,16 @@ The gadget's side of the link is described in the SDK's [protocol guide](https:/
 
 ## Status
 
-Early scaffold: SwiftUI, iOS 17 or later. No Bluetooth code yet.
+The SwiftUI interface, iOS 17 or later, with a Core Bluetooth link to the gadget (`BluetoothGadgetLink`) behind the `GadgetLink` protocol. `MockGadgetLink` acts out mock scenarios for trying screens without a gadget.
+
+To switch between real Bluetooth and the mock scenarios, long-press any screen's title for a second to open the debug menu. The choice is kept across launches; the launch argument `-mockScenario <name>` sets it too.
+
+The pixel font, the mascot frames and the app icon come from the SDK's firmware. To regenerate them (the icon needs Pillow):
+
+```bash
+python3 scripts/generate-assets.py ~/path/to/hermes-gadget-sdk
+python3 scripts/make-icon.py ~/path/to/hermes-gadget-sdk
+```
 
 ## Building
 
@@ -21,4 +30,4 @@ Installing on a phone needs `xtool auth login` with your Apple ID. Without a pai
 
 ## License
 
-MIT; see [LICENSE](LICENSE).
+MIT; see [LICENSE](LICENSE). The mascot art is Hermes Agent's (MIT, © 2025 Nous Research); see [NOTICE](NOTICE).
