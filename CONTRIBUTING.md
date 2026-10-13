@@ -17,7 +17,11 @@ Remove anything that identifies your setup first: server addresses, device IDs, 
 
 ## Setting up
 
-The app is a Swift package built with [xtool](https://github.com/xtool-org/xtool), so you can work on it from Linux or macOS.
+The repository holds both apps: the iOS app in `ios/` and the Android app in `android/`, with shared reply samples in `fixtures/` and asset scripts in `scripts/`.
+
+### iOS
+
+The iOS app is a Swift package in `ios/`, built with [xtool](https://github.com/xtool-org/xtool), so you can work on it from Linux or macOS. Run these from `ios/`:
 
 ```bash
 swift test --package-path GadgetKit   # the app's logic; Linux or macOS, no iPhone needed
@@ -26,7 +30,7 @@ xtool dev                            # build, sign and install on a connected iP
 ```
 
 - **Linux:** install Swift 6 and xtool, then the iOS SDK with `xtool sdk install <Xcode.xip>` (download Xcode from Apple with your Apple ID). Installing on a phone needs `xtool auth login` and `usbmuxd`.
-- **macOS:** xtool works the same way, or open `Package.swift` in Xcode.
+- **macOS:** xtool works the same way, or open `ios/Package.swift` in Xcode.
 
 Without a paid Apple developer account, a signed build expires after seven days and needs installing again.
 
@@ -48,9 +52,9 @@ adb install app/build/outputs/apk/debug/app-debug.apk  # on a phone with USB deb
 
 | Part | What's in it | Runs on |
 |---|---|---|
-| `GadgetKit` package (`GadgetKit/Sources/GadgetKit`) | Reply parsing, the `GadgetStore` view model, the `GadgetLink` protocol, the mock gadget and its scenarios, Wi-Fi setup logic, the generated font and mascot data. Foundation and Observation only | Linux, macOS, iOS |
-| The `HermesCompanion` app (`Sources/HermesCompanion`) | The SwiftUI screens and styles, and `BluetoothGadgetLink` (Core Bluetooth) | iOS |
-| `GadgetKitTests` (`GadgetKit/Tests/GadgetKitTests`) | Swift Testing tests for GadgetKit | Linux, macOS |
+| `GadgetKit` package (`ios/GadgetKit/Sources/GadgetKit`) | Reply parsing, the `GadgetStore` view model, the `GadgetLink` protocol, the mock gadget and its scenarios, Wi-Fi setup logic, the generated font and mascot data. Foundation and Observation only | Linux, macOS, iOS |
+| The `HermesCompanion` app (`ios/Sources/HermesCompanion`) | The SwiftUI screens and styles, and `BluetoothGadgetLink` (Core Bluetooth) | iOS |
+| `GadgetKitTests` (`ios/GadgetKit/Tests/GadgetKitTests`) | Swift Testing tests for GadgetKit | Linux, macOS |
 | `android/core` | The Kotlin port of GadgetKit (`com.tozes.hermescompanion.core`), plus the radio-free half of the Android Bluetooth link (`core.ble`: the GATT operation queue, pairing and failure mapping), and their JUnit tests. Kotlin, coroutines and kotlinx.serialization only | any JVM |
 | `android/app` | The Compose screens and styles, and the Android side of `BluetoothGadgetLink` (permissions, scanning, `BluetoothGatt`) | Android 10+ |
 | `fixtures/replies` | Reply samples, exactly as the gadget sends them, read by both test suites | |

@@ -1,6 +1,6 @@
 # Fixtures
 
-Sample replies from the gadget's console, shared by both ports of the app's logic: the Swift tests in `GadgetKit/Tests` and the Kotlin tests in `android/core/src/test`. Both suites read these files, so a protocol change updates them here once and both ports are tested against it.
+Sample replies from the gadget's console, shared by both ports of the app's logic: the Swift tests in `ios/GadgetKit/Tests` and the Kotlin tests in `android/core/src/test`. Both suites read these files, so a protocol change updates them here once and both ports are tested against it.
 
 `replies/` holds one reply per file, exactly as the gadget sends it over Bluetooth without the terminating NUL byte: no trailing newline unless the reply has one. Each file is named for what it is (`status-new-gadget.txt`, `error-busy.txt`, `wifi-list.txt`…). The prefix is the reply's tag, so `status-*` files are `@status` replies, and `help.txt`, `diag.txt` and `diag-log.txt` are kept as text.
 

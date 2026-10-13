@@ -4,7 +4,7 @@
 
 ## How you know it works
 
-<!-- Tests you ran (`swift test`, `xtool dev build`), and what you checked on a phone: model, iOS version, gadget board and firmware. Say what ran against a real gadget and what only ran against the mock. -->
+<!-- Tests you ran (`swift test --package-path GadgetKit` and `xtool dev build` in `ios/`, `./gradlew :core:test :app:assembleDebug` in `android/`), and what you checked on a phone: model, iOS or Android version, gadget board and firmware. Say what ran against a real gadget and what only ran against the mock. -->
 
 <!-- Give exact commands and results. For a bug, describe the failure before and the result after. List failed or skipped checks and why. Screenshots help for UI changes. -->
 

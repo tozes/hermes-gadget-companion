@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- The iOS app moves into `ios/`, next to `android/`; shared reply samples, scripts and docs stay at the root. Build and test iOS from `ios/`.
 - The console no longer shows secrets the app or you send: Wi-Fi passwords and the Hermes access token appear as `<hidden>` (the gadget still gets them).
 - An Android app (Android 10 or later) with the same screens, demo and debug menu as the iOS app, its logic ported to Kotlin and tested against the same reply samples; it builds and passes its tests, but its Bluetooth link hasn't been tried on a phone yet.
 
