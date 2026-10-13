@@ -160,6 +160,15 @@ struct GadgetStoreTests {
         #expect(store.isScanning)
     }
 
+    @Test func aNewConnectionStartsAFreshConsole() async {
+        let store = await connectedNox()
+        store.backToFinding()
+        store.connect(to: nox)
+        link.emit(.connected)
+        #expect(await eventually { store.status != nil })
+        #expect(store.console.filter { $0.text == "Connected to Nox" }.count == 1)
+    }
+
     @Test func linkDroppedWhileConnected() async {
         let store = await connectedNox()
         link.emit(.disconnected(.connectionLost))
@@ -173,6 +182,8 @@ struct GadgetStoreTests {
         store.reconnect()
         #expect(store.stage == .pairing)
         #expect(!store.connectionLost)
+        // Reconnecting keeps the console, drop and all.
+        #expect(store.console.contains { $0.text == "Connection lost" })
         #expect(link.target == nox)
     }
 

@@ -15,7 +15,7 @@ struct StatusDetails: View {
             InfoRow(label: "Hermes", value: hermes)
             if let server = status.server, !server.isEmpty {
                 PanelDivider()
-                InfoRow(label: "Server", value: server, monospaced: true)
+                InfoRow(label: "Server", value: server, monospaced: true, breaksAfter: ["/", "."])
             }
             PanelDivider()
             InfoRow(label: "Firmware", value: status.firmware ?? "Unknown")

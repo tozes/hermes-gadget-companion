@@ -66,26 +66,38 @@ struct ConsoleView: View {
 
     // MARK: Input
 
+    /// The quick commands, spread across the width when they fit, and
+    /// scrolling sideways (from inside the margins) when they don't.
     private var quickBar: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(Self.quickCommands, id: \.self) { command in
-                    Button { send(command) } label: {
-                        Text(command)
-                            .font(.system(.footnote, design: .monospaced))
-                            .foregroundStyle(Palette.text)
-                            .padding(.horizontal, 12)
-                            .frame(minHeight: 44)
-                            .background(Palette.bar, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityHint(Text("Sends \(command)"))
-                }
+        ViewThatFits(in: .horizontal) {
+            quickRow(fill: true)
+                .padding(.horizontal, 16)
+            ScrollView(.horizontal, showsIndicators: false) {
+                quickRow(fill: false)
+                    .padding(.horizontal, 16)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
         }
+        .padding(.vertical, 8)
         .disabled(store.connectionLost)
+    }
+
+    private func quickRow(fill: Bool) -> some View {
+        HStack(spacing: 6) {
+            ForEach(Self.quickCommands, id: \.self) { command in
+                Button { send(command) } label: {
+                    Text(command)
+                        .font(.system(.footnote, design: .monospaced))
+                        .foregroundStyle(Palette.text)
+                        .lineLimit(1)
+                        .fixedSize()
+                        .padding(.horizontal, 10)
+                        .frame(maxWidth: fill ? .infinity : nil, minHeight: 44)
+                        .background(Palette.bar, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint(Text("Sends \(command)"))
+            }
+        }
     }
 
     private var inputBar: some View {

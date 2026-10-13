@@ -134,7 +134,10 @@ public final class GadgetStore {
 
     // MARK: Connecting
 
+    /// Connects from the gadget list. Each new connection starts with an empty
+    /// console; reconnecting after a drop keeps it.
     public func connect(to target: DiscoveredGadget) {
+        if stage == .finding { console = [] }
         stopScan()
         forgottenName = nil
         resetConnection()
