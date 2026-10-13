@@ -1,0 +1,1 @@
+@error screen_timeout must be 0..3600 seconds

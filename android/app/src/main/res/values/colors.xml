@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Palette.background, the gadget's screen (firmware ui.cpp). -->
+    <color name="background">#FF0A0E14</color>
+    <!-- The launcher icon's background layer, as AppIcon.png. -->
+    <color name="ic_launcher_background">#FF000000</color>
+</resources>

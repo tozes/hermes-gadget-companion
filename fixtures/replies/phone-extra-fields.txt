@@ -1,0 +1,1 @@
+@phone {"paired":2,"connected":false,"pairing":true,"slots":3,"extra":{"a":[1,2]}}

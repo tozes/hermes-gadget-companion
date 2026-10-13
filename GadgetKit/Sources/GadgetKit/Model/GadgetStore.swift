@@ -247,7 +247,7 @@ public final class GadgetStore {
     private func perform(_ line: String, typed: Bool) async -> Reply {
         let started = generation
         let clean = line.replacingOccurrences(of: "\n", with: " ")
-        log(.command, clean, typed: typed)
+        log(.command, ConsoleArgument.redacted(clean), typed: typed)
         guard clean.utf8.count <= Self.maxLineBytes else {
             note("Not sent: lines are limited to \(Self.maxLineBytes) bytes", typed: typed)
             return .error("too long: the gadget takes lines up to \(Self.maxLineBytes) bytes")

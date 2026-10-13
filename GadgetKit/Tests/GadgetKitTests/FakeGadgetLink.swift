@@ -96,7 +96,7 @@ func connectedStore(_ link: FakeGadgetLink) async -> GadgetStore {
 }
 
 /// The real `@status` sample from a gadget (sanitized).
-let statusSample = #"@status {"device_id":"hg-5a1c9e2f7b3d4086","name":"Nox","board":"esp32s3-touch-amoled-1.75c","firmware":"0.2.0","phase":"no_network","screen":"offline","paired":false,"server":"wss://hermes.example.com:8765/gadget","network":false,"display_sleeping":false,"power":{"available":true,"battery_present":true,"battery_mv":4126,"battery_percent":84,"charging":true,"external_power":true},"phone":{"paired":1,"connected":true,"pairing":false}}"#
+let statusSample = Fixture.reply("status-new-gadget")
 
 let nox = DiscoveredGadget(id: UUID(uuidString: "6E0B9C1A-4F2D-4C8E-9B57-3A1D2C4F7E01")!, name: "Nox", rssi: -52)
 let kitchen = DiscoveredGadget(id: UUID(uuidString: "6E0B9C1A-4F2D-4C8E-9B57-3A1D2C4F7E02")!, name: "Kitchen", rssi: -74)

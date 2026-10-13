@@ -212,7 +212,7 @@ struct GadgetStoreTests {
         // The second line waits for the first reply.
         #expect(link.sent == ["status", "get volume"])
 
-        link.answer(#"@value {"key":"volume","value":"70"}"#)
+        link.answer(Fixture.reply("value-volume"))
         #expect(await first.value == .value(SettingValue(key: "volume", value: "70")))
         #expect(await eventually { link.unanswered == 1 })
         #expect(link.sent == ["status", "get volume", "get brightness"])
@@ -228,7 +228,7 @@ struct GadgetStoreTests {
         let reply = Task { await store.send("get volume") }
         #expect(await eventually { link.unanswered == 1 })
         link.emit(.disconnected(.connectionLost))
-        link.answer(#"@value {"key":"volume","value":"70"}"#)
+        link.answer(Fixture.reply("value-volume"))
         #expect(await reply.value == .error("not connected"))
         #expect(store.settings[.volume] == nil)
         #expect(!store.console.contains { $0.kind == .reply && $0.text.contains("volume") })
@@ -303,6 +303,25 @@ struct GadgetStoreTests {
         #expect(store.settings[.token] == "")
     }
 
+    /// The gadget gets secrets as typed; the console only ever shows them hidden.
+    @Test func secretsStayOutOfTheConsole() async {
+        let store = await connectedNox()
+        _ = await store.save(.wifiPassword, "correct horse")
+        _ = await store.save(.token, "tok-123")
+        _ = await store.send(#"wifi add "Lisbon Loft" "hotspot pass""#, typed: true)
+        #expect(link.sent.suffix(3) == ["set wifi_pass correct horse", "set token tok-123", #"wifi add "Lisbon Loft" "hotspot pass""#])
+        let commands = store.console.filter { $0.kind == .command }.map(\.text)
+        #expect(commands.suffix(3) == ["set wifi_pass <hidden>", "set token <hidden>", #"wifi add "Lisbon Loft" <hidden>"#])
+        #expect(!store.console.contains { $0.text.contains("correct horse") || $0.text.contains("tok-123") || $0.text.contains("hotspot pass") })
+    }
+
+    @Test func ordinaryLinesAreLoggedAsTyped() {
+        #expect(ConsoleArgument.redacted("set volume 40") == "set volume 40")
+        #expect(ConsoleArgument.redacted("set token") == "set token")
+        #expect(ConsoleArgument.redacted("wifi add Open") == "wifi add Open")
+        #expect(ConsoleArgument.redacted("get wifi_pass") == "get wifi_pass")
+    }
+
     @Test func renamingUpdatesTheStatusAndGadget() async {
         let store = await connectedNox()
         #expect(await store.save(.name, " Desk ") == nil)
@@ -320,7 +339,7 @@ struct GadgetStoreTests {
 
     @Test func errorIsReturnedToTheCaller() async {
         let store = await connectedNox()
-        link.respond = { _ in "@error screen_timeout must be 0..3600 seconds" }
+        link.respond = { _ in Fixture.reply("error-screen-timeout") }
         #expect(await store.save(.screenTimeout, "9999") == "screen_timeout must be 0..3600 seconds")
         #expect(store.settings[.screenTimeout] == nil)
     }
@@ -350,7 +369,7 @@ struct GadgetStoreTests {
         #expect(store.settings[.volume] == nil)
         // Only what's missing is asked again.
         let before = link.sent.count
-        link.respond = { _ in #"@value {"key":"volume","value":"70"}"# }
+        link.respond = { _ in Fixture.reply("value-volume") }
         await store.loadSettings()
         #expect(Array(link.sent[before...]) == ["get volume"])
         #expect(!store.missingSettings)
@@ -358,7 +377,7 @@ struct GadgetStoreTests {
 
     @Test func statusErrorIsKept() async {
         let store = await connectedNox()
-        link.respond = { _ in "@error device busy" }
+        link.respond = { _ in Fixture.reply("error-busy") }
         #expect(await store.refreshStatus() == false)
         #expect(store.statusError == "device busy")
         #expect(store.status?.name == "Nox")
@@ -387,7 +406,7 @@ struct GadgetStoreTests {
 
     @Test func refusedForgetStaysConnected() async {
         let store = await connectedNox()
-        link.respond = { _ in "@error device busy" }
+        link.respond = { _ in Fixture.reply("error-busy") }
         #expect(await store.forget() == "device busy")
         #expect(store.stage == .connected)
         #expect(store.forgottenName == nil)

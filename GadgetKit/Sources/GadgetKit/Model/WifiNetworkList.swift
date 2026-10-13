@@ -76,6 +76,24 @@ public enum ConsoleArgument {
         return out + "\""
     }
 
+    /// The placeholder for a secret in the console's scrollback.
+    static let hidden = "<hidden>"
+
+    /// `line` as the console shows it: the value of `set token` and
+    /// `set wifi_pass`, and the password of `wifi add`, replaced with
+    /// `hidden`. The gadget still gets the line as written.
+    static func redacted(_ line: String) -> String {
+        let words = split(line)
+        guard words.count >= 3 else { return line }
+        if words[0] == "set", let key = SettingKey(rawValue: words[1]), key.isSecret {
+            return "set \(key.rawValue) \(hidden)"
+        }
+        if words[0] == "wifi", words[1] == "add", words.count >= 4 {
+            return "wifi add \(quoted(words[2])) \(hidden)"
+        }
+        return line
+    }
+
     /// Splits a line the way the gadget does.
     static func split(_ line: String) -> [String] {
         var out: [String] = []

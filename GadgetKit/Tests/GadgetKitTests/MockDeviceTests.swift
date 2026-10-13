@@ -9,7 +9,7 @@ struct MockDeviceTests {
 
     @Test func getReturnsTheValue() {
         var device = MockDevice.nox(.newGadget)
-        #expect(device.handle("get volume", now: now) == #"@value {"key":"volume","value":"70"}"#)
+        #expect(device.handle("get volume", now: now) == Fixture.reply("value-volume"))
         #expect(Reply.parse(device.handle("get name", now: now)) == .value(SettingValue(key: "name", value: "Nox")))
     }
 
@@ -45,7 +45,7 @@ struct MockDeviceTests {
     @Test(arguments: ["-1", "3601", "12345", "00001", "abc", "1.5", "６０"])
     func screenTimeoutOutOfRange(value: String) {
         var device = MockDevice.nox(.online)
-        #expect(device.handle("set screen_timeout \(value)", now: now) == "@error screen_timeout must be 0..3600 seconds")
+        #expect(device.handle("set screen_timeout \(value)", now: now) == Fixture.reply("error-screen-timeout"))
         #expect(device.settings["screen_timeout"] == "60")
     }
 
@@ -77,7 +77,7 @@ struct MockDeviceTests {
 
     @Test func unknownCommand() {
         var device = MockDevice.nox(.online)
-        #expect(device.handle("dance", now: now) == "@error unknown command (try: help)")
+        #expect(device.handle("dance", now: now) == Fixture.reply("error-unknown-command"))
     }
 
     @Test func statusDecodes() {
